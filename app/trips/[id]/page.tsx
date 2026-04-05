@@ -11,6 +11,11 @@ import { useAvailability } from '@/hooks/useAvailability'
 import { AvailabilityGrid } from '@/components/availability/AvailabilityGrid'
 import { usePolls } from '@/hooks/usePolls'
 import { PollList } from '@/components/polls/PollList'
+import { useExpenses } from '@/hooks/useExpenses'
+import { BalancesSummary } from '@/components/expenses/BalancesSummary'
+import { ExpenseList } from '@/components/expenses/ExpenseList'
+import { AddExpenseSheet } from '@/components/expenses/AddExpenseSheet'
+import { BottomSheet } from '@/components/ui/BottomSheet'
 
 export default function TripPage() {
   const params = useParams<{ id: string }>()
@@ -19,7 +24,9 @@ export default function TripPage() {
   const { trip, members, loading } = useTrip(tripId)
   const { rows: availRows, dateRange, expandDateRange } = useAvailability(tripId)
   const { polls, votes, createPoll, vote, deletePoll } = usePolls(tripId)
+  const { expenses, addExpense } = useExpenses(tripId)
   const [activeTab, setActiveTab] = useState<Tab>('details')
+  const [showAddExpense, setShowAddExpense] = useState(false)
   const [member, setMember] = useState<{ memberId: string; displayName: string } | null>(null)
 
   useEffect(() => {
@@ -75,7 +82,24 @@ export default function TripPage() {
           />
         )}
         {activeTab === 'expenses' && (
-          <p className="text-gray-500 text-sm">Expenses tab — coming soon</p>
+          <>
+            <BalancesSummary expenses={expenses} members={members} currentMemberId={member.memberId} />
+            <button
+              onClick={() => setShowAddExpense(true)}
+              className="w-full bg-blue-600 text-white rounded-xl py-3 font-semibold text-sm mb-4 active:bg-blue-700"
+            >
+              + Add Expense
+            </button>
+            <ExpenseList expenses={expenses} members={members} />
+            <BottomSheet open={showAddExpense} onClose={() => setShowAddExpense(false)} title="Add Expense">
+              <AddExpenseSheet
+                members={members}
+                currentMemberId={member.memberId}
+                onSubmit={addExpense}
+                onClose={() => setShowAddExpense(false)}
+              />
+            </BottomSheet>
+          </>
         )}
       </main>
 
