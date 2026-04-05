@@ -7,6 +7,7 @@ import { TabBar, type Tab } from '@/components/ui/TabBar'
 import { TripHeader } from '@/components/trip/TripHeader'
 import { TripNotes } from '@/components/trip/TripNotes'
 import { TripLinks } from '@/components/trip/TripLinks'
+import { ItineraryList } from '@/components/itinerary/ItineraryList'
 import { useAvailability } from '@/hooks/useAvailability'
 import { AvailabilityGrid } from '@/components/availability/AvailabilityGrid'
 import { usePolls } from '@/hooks/usePolls'
@@ -59,6 +60,10 @@ export default function TripPage() {
             <TripHeader trip={trip} />
             <TripNotes tripId={tripId} initialNotes={trip.description} />
             <TripLinks tripId={tripId} memberId={member.memberId} />
+            <div className="mt-2">
+              <h3 className="font-semibold text-sm text-gray-700 mb-3">Itinerary</h3>
+              <ItineraryList tripId={tripId} />
+            </div>
           </>
         )}
         {activeTab === 'availability' && (
