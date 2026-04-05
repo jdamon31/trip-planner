@@ -16,7 +16,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import type { ItineraryItem } from '@/lib/supabase/types'
 import { AddItineraryForm } from './AddItineraryForm'
@@ -35,7 +35,7 @@ function SortableItem({ item }: { item: ItineraryItem }) {
         <p className="text-sm font-medium text-gray-800">{item.activity}</p>
         {(item.day || item.time) && (
           <p className="text-xs text-gray-400 mt-0.5">
-            {item.day && format(new Date(item.day), 'MMM d')}
+            {item.day && format(parseISO(item.day), 'MMM d')}
             {item.day && item.time && ' · '}
             {item.time && item.time.slice(0, 5)}
           </p>
@@ -59,8 +59,22 @@ export function ItineraryList({ tripId }: ItineraryListProps) {
 
   useEffect(() => {
     const supabase = getSupabaseClient()
+
     supabase.from('itinerary_items').select('*').eq('trip_id', tripId).order('sort_order')
       .then(({ data }) => { if (data) setItems(data as ItineraryItem[]) })
+
+    const channel = supabase
+      .channel(`itinerary-${tripId}`)
+      .on('postgres_changes' as any,
+        { event: '*', schema: 'public', table: 'itinerary_items', filter: `trip_id=eq.${tripId}` },
+        () => {
+          supabase.from('itinerary_items').select('*').eq('trip_id', tripId).order('sort_order')
+            .then(({ data }) => { if (data) setItems(data as ItineraryItem[]) })
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [tripId])
 
   async function handleAdd(item: { day: string | null; time: string | null; activity: string }) {

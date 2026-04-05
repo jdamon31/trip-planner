@@ -42,7 +42,13 @@ export function useAvailability(tripId: string) {
     const channel = supabase
       .channel(`availability-${tripId}`)
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'availability' },
-        () => { load() }
+        (payload: any) => {
+          const changedMemberId = payload.new?.member_id ?? payload.old?.member_id
+          if (!changedMemberId) { load(); return }
+          getSupabaseClient()
+            .from('members').select('id').eq('trip_id', tripId).eq('id', changedMemberId).single()
+            .then(({ data }) => { if (data) load() })
+        }
       )
       .subscribe()
 

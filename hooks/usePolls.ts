@@ -34,6 +34,8 @@ export function usePolls(tripId: string) {
     const channel = supabase
       .channel(`polls-${tripId}`)
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'polls', filter: `trip_id=eq.${tripId}` }, load)
+      // TODO: votes subscription is unfiltered — load() is trip-scoped so data is correct,
+      // but this fires on votes from all trips. Acceptable for v1.
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'votes' }, load)
       .subscribe()
 

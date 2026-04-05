@@ -24,6 +24,23 @@ describe('calculateBalances', () => {
     expect(balances.get('bob')).toBe(-50)    // paid 0, owes 50 → net -50
   })
 
+  it('handles three-way even split correctly', () => {
+    const expenses: Expense[] = [
+      makeExpense('alice', 10, [
+        { member_id: 'alice', amount: 3.34 },
+        { member_id: 'bob', amount: 3.33 },
+        { member_id: 'carol', amount: 3.33 },
+      ]),
+    ]
+    const balances = calculateBalances(expenses)
+    expect(balances.get('alice')).toBeCloseTo(6.66, 2)  // paid 10, owes 3.34 → net +6.66
+    expect(balances.get('bob')).toBeCloseTo(-3.33, 2)
+    expect(balances.get('carol')).toBeCloseTo(-3.33, 2)
+    // Verify total balances sum to ~0
+    const total = [...balances.values()].reduce((s, v) => s + v, 0)
+    expect(Math.abs(total)).toBeLessThan(0.01)
+  })
+
   it('handles multiple expenses', () => {
     const expenses: Expense[] = [
       makeExpense('alice', 60, [

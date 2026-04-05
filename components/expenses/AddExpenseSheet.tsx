@@ -39,7 +39,12 @@ export function AddExpenseSheet({ members, currentMemberId, onSubmit, onClose }:
   function buildSplits(): ExpenseSplit[] | null {
     if (splitMembers.length === 0) return null
     if (customSplits.size === 0) {
-      return splitMembers.map(m => ({ member_id: m.id, amount: Math.round(equalShare * 100) / 100 }))
+      const base = Math.floor(equalShare * 100) / 100
+      const remainder = Math.round((totalAmount - base * splitMembers.length) * 100) / 100
+      return splitMembers.map((m, i) => ({
+        member_id: m.id,
+        amount: i === splitMembers.length - 1 ? base + remainder : base,
+      }))
     }
     const splits = splitMembers.map(m => {
       const custom = customSplits.get(m.id)

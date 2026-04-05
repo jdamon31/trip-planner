@@ -48,8 +48,8 @@ export function minimumTransactions(balances: Map<string, number>): Transaction[
 
     transactions.push({ from: debt.id, to: credit.id, amount: rounded })
 
-    credit.amount -= amount
-    debt.amount -= amount
+    credit.amount = Math.round((credit.amount - amount) * 100) / 100
+    debt.amount = Math.round((debt.amount - amount) * 100) / 100
 
     if (Math.round(credit.amount * 100) === 0) ci++
     if (Math.round(debt.amount * 100) === 0) di++

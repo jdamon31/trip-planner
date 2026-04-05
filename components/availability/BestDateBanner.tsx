@@ -1,5 +1,5 @@
 import type { RankedDate } from '@/lib/utils/availability'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 
 interface BestDateBannerProps {
   bestDates: RankedDate[]
@@ -17,7 +17,7 @@ export function BestDateBanner({ bestDates, memberCount, onConfirm }: BestDateBa
         <div key={d.date} className="flex items-center justify-between py-1.5">
           <div>
             <span className="font-semibold text-gray-800">
-              {format(new Date(d.date), 'MMM d')}
+              {format(parseISO(d.date), 'MMM d')}
             </span>
             {d.allAvailable ? (
               <span className="ml-2 text-green-600 text-sm font-medium">🎉 Everyone&apos;s free!</span>

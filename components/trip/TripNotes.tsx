@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { getSupabaseClient } from '@/lib/supabase/client'
 
 interface TripNotesProps {
@@ -10,11 +10,14 @@ interface TripNotesProps {
 export function TripNotes({ tripId, initialNotes }: TripNotesProps) {
   const [notes, setNotes] = useState(initialNotes ?? '')
   const [saving, setSaving] = useState(false)
+  const savedRef = useRef(initialNotes ?? '')
 
   async function handleBlur() {
+    if (notes === savedRef.current) return
     setSaving(true)
     const supabase = getSupabaseClient()
     await supabase.from('trips').update({ description: notes || null }).eq('id', tripId)
+    savedRef.current = notes
     setSaving(false)
   }
 

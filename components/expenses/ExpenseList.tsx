@@ -1,5 +1,5 @@
 import type { Expense, Member } from '@/lib/supabase/types'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 
 interface ExpenseListProps {
   expenses: Expense[]
@@ -19,7 +19,7 @@ export function ExpenseList({ expenses, members }: ExpenseListProps) {
             <div>
               <p className="font-medium text-gray-800 text-sm">{expense.description}</p>
               <p className="text-xs text-gray-500 mt-0.5">
-                Paid by {memberMap.get(expense.paid_by) ?? 'Unknown'} · {format(new Date(expense.created_at), 'MMM d')}
+                Paid by {memberMap.get(expense.paid_by) ?? 'Unknown'} · {format(parseISO(expense.created_at), 'MMM d')}
               </p>
             </div>
             <span className="font-bold text-gray-900 text-sm">${Number(expense.amount).toFixed(2)}</span>

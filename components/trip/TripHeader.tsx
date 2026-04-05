@@ -1,5 +1,5 @@
 import type { Trip } from '@/lib/supabase/types'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 
 interface TripHeaderProps {
   trip: Trip
@@ -15,7 +15,7 @@ export function TripHeader({ trip }: TripHeaderProps) {
       {trip.confirmed_date && (
         <div className="mt-2 inline-flex items-center gap-1.5 bg-green-50 text-green-700 text-sm font-medium px-3 py-1 rounded-full">
           <span>✅</span>
-          <span>{format(new Date(trip.confirmed_date), 'MMMM d, yyyy')}</span>
+          <span>{format(parseISO(trip.confirmed_date!), 'MMMM d, yyyy')}</span>
         </div>
       )}
     </div>
