@@ -16,7 +16,7 @@ A mobile-first website that helps groups plan trips together. Anyone can create 
 - **Frontend/Backend:** Next.js (App Router) deployed on Vercel
 - **Database + Real-time:** Supabase (Postgres + real-time subscriptions)
 - **Identity:** Anonymous, link-based. `member_id` stored in localStorage per trip.
-- **Styling:** TBD (Tailwind recommended for mobile-first)
+- **Styling:** Tailwind CSS
 
 ---
 
@@ -52,6 +52,7 @@ availability
   member_id   UUID REFERENCES members
   date        DATE
   status      TEXT CHECK (status IN ('available', 'maybe', 'unavailable'))
+  UNIQUE(member_id, date)
 
 polls
   id          UUID PRIMARY KEY
@@ -195,7 +196,7 @@ trip_links
 - Duplicate join: if `member_id` exists in localStorage for this trip, skip join screen
 - Expense splits must sum to total amount — validated client-side before submit
 - Poll options: minimum 2, no hard maximum
-- Date range: any member can extend the availability window; existing availability is preserved
+- Date range: any member can expand the availability window (add more dates); shrinking is not allowed. Existing availability is preserved when expanding.
 - Confirmed date: stored on the trip record, displayed prominently in the header
 
 ---
