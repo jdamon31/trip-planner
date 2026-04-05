@@ -50,8 +50,26 @@ export default function TripPage() {
   return (
     <div className="min-h-screen pb-16">
       <header className="bg-white border-b px-4 py-3 sticky top-0 z-10">
-        <h1 className="font-bold text-lg">{trip.name}</h1>
-        {trip.destination && <p className="text-sm text-gray-500">{trip.destination}</p>}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-bold text-lg">{trip.name}</h1>
+            {trip.destination && <p className="text-sm text-gray-500">{trip.destination}</p>}
+          </div>
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/trips/${tripId}/join`
+              if (navigator.share) {
+                navigator.share({ title: trip.name, url })
+              } else {
+                navigator.clipboard.writeText(url)
+                alert('Invite link copied!')
+              }
+            }}
+            className="text-blue-600 text-sm font-medium border border-blue-200 rounded-full px-3 py-1.5 active:bg-blue-50 shrink-0 ml-3"
+          >
+            Share
+          </button>
+        </div>
       </header>
 
       <main className="p-4">
