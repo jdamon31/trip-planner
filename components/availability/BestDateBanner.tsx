@@ -1,0 +1,41 @@
+import type { RankedDate } from '@/lib/utils/availability'
+import { format } from 'date-fns'
+
+interface BestDateBannerProps {
+  bestDates: RankedDate[]
+  memberCount: number
+  onConfirm: (date: string) => void
+}
+
+export function BestDateBanner({ bestDates, memberCount, onConfirm }: BestDateBannerProps) {
+  if (bestDates.length === 0 || memberCount === 0) return null
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4">
+      <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">Best Dates</p>
+      {bestDates.map(d => (
+        <div key={d.date} className="flex items-center justify-between py-1.5">
+          <div>
+            <span className="font-semibold text-gray-800">
+              {format(new Date(d.date), 'MMM d')}
+            </span>
+            {d.allAvailable ? (
+              <span className="ml-2 text-green-600 text-sm font-medium">🎉 Everyone&apos;s free!</span>
+            ) : (
+              <span className="ml-2 text-gray-500 text-sm">
+                {d.availableCount}/{memberCount} available
+                {d.maybeCount > 0 && `, ${d.maybeCount} maybe`}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => onConfirm(d.date)}
+            className="text-xs font-medium text-blue-600 border border-blue-300 rounded-full px-2.5 py-1 ml-3 active:bg-blue-100"
+          >
+            Set date
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}

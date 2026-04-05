@@ -1,0 +1,123 @@
+'use client'
+import { useMemo } from 'react'
+import { eachDayOfInterval, format, parseISO } from 'date-fns'
+import { AvailabilityCell } from './AvailabilityCell'
+import { BestDateBanner } from './BestDateBanner'
+import { DateRangeProposer } from './DateRangeProposer'
+import { getBestDates } from '@/lib/utils/availability'
+import { getSupabaseClient } from '@/lib/supabase/client'
+import type { Member, Availability, AvailabilityStatus } from '@/lib/supabase/types'
+
+interface AvailabilityGridProps {
+  tripId: string
+  members: Member[]
+  rows: Availability[]
+  dateRange: { start: string; end: string } | null
+  currentMemberId: string
+  onExpandRange: (start: string, end: string) => void
+}
+
+export function AvailabilityGrid({
+  tripId,
+  members,
+  rows,
+  dateRange,
+  currentMemberId,
+  onExpandRange,
+}: AvailabilityGridProps) {
+  const dates = useMemo(() => {
+    if (!dateRange) return []
+    return eachDayOfInterval({ start: parseISO(dateRange.start), end: parseISO(dateRange.end) })
+  }, [dateRange])
+
+  const bestDates = useMemo(() => getBestDates(rows, members.length), [rows, members.length])
+  const bestDateSet = useMemo(() => new Set(bestDates.map(d => d.date)), [bestDates])
+
+  const statusMap = useMemo(() => {
+    const map = new Map<string, Map<string, AvailabilityStatus>>()
+    for (const row of rows) {
+      if (!map.has(row.member_id)) map.set(row.member_id, new Map())
+      map.get(row.member_id)!.set(row.date, row.status)
+    }
+    return map
+  }, [rows])
+
+  async function handleCellClick(memberId: string, date: string, currentStatus: AvailabilityStatus | null) {
+    const next: AvailabilityStatus = !currentStatus || currentStatus === 'unavailable'
+      ? 'available'
+      : currentStatus === 'available' ? 'maybe' : 'unavailable'
+    const supabase = getSupabaseClient()
+    await supabase.from('availability').upsert(
+      { member_id: memberId, date, status: next },
+      { onConflict: 'member_id,date' }
+    )
+  }
+
+  async function handleConfirmDate(date: string) {
+    const supabase = getSupabaseClient()
+    await supabase.from('trips').update({ confirmed_date: date }).eq('id', tripId)
+  }
+
+  if (dates.length === 0) {
+    return (
+      <div>
+        <DateRangeProposer onPropose={onExpandRange} />
+        <p className="text-sm text-gray-400 text-center py-8">No dates proposed yet</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <BestDateBanner bestDates={bestDates} memberCount={members.length} onConfirm={handleConfirmDate} />
+      <DateRangeProposer onPropose={onExpandRange} />
+
+      <div className="overflow-x-auto -mx-4 px-4">
+        <table className="border-collapse">
+          <thead>
+            <tr>
+              <th className="sticky left-0 bg-gray-50 z-10 min-w-[80px] text-left text-xs font-medium text-gray-500 pb-2 pr-3">
+                Member
+              </th>
+              {dates.map(date => {
+                const key = format(date, 'yyyy-MM-dd')
+                return (
+                  <th key={key} className={`text-center pb-2 px-1 ${bestDateSet.has(key) ? 'bg-blue-50' : ''}`}>
+                    <div className="text-xs font-medium text-gray-500">{format(date, 'MMM')}</div>
+                    <div className="text-sm font-bold text-gray-800">{format(date, 'd')}</div>
+                  </th>
+                )
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {members.map(member => (
+              <tr key={member.id}>
+                <td className="sticky left-0 bg-white z-10 text-sm font-medium text-gray-700 pr-3 py-1 whitespace-nowrap">
+                  {member.display_name}
+                  {member.id === currentMemberId && (
+                    <span className="text-xs text-blue-500 ml-1">(you)</span>
+                  )}
+                </td>
+                {dates.map(date => {
+                  const dateKey = format(date, 'yyyy-MM-dd')
+                  const status = statusMap.get(member.id)?.get(dateKey) ?? null
+                  return (
+                    <td key={dateKey} className={`px-1 py-1 ${bestDateSet.has(dateKey) ? 'bg-blue-50' : ''}`}>
+                      <AvailabilityCell
+                        status={status}
+                        isCurrentUser={member.id === currentMemberId}
+                        isBestDate={bestDateSet.has(dateKey)}
+                        onClick={() => handleCellClick(member.id, dateKey, status)}
+                      />
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}

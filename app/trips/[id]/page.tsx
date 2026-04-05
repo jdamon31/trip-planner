@@ -7,12 +7,15 @@ import { TabBar, type Tab } from '@/components/ui/TabBar'
 import { TripHeader } from '@/components/trip/TripHeader'
 import { TripNotes } from '@/components/trip/TripNotes'
 import { TripLinks } from '@/components/trip/TripLinks'
+import { useAvailability } from '@/hooks/useAvailability'
+import { AvailabilityGrid } from '@/components/availability/AvailabilityGrid'
 
 export default function TripPage() {
   const params = useParams<{ id: string }>()
   const tripId = params.id
   const router = useRouter()
   const { trip, members, loading } = useTrip(tripId)
+  const { rows: availRows, dateRange, expandDateRange } = useAvailability(tripId)
   const [activeTab, setActiveTab] = useState<Tab>('details')
   const [member, setMember] = useState<{ memberId: string; displayName: string } | null>(null)
 
@@ -49,7 +52,14 @@ export default function TripPage() {
           </>
         )}
         {activeTab === 'availability' && (
-          <p className="text-gray-500 text-sm">Availability tab — coming soon</p>
+          <AvailabilityGrid
+            tripId={tripId}
+            members={members}
+            rows={availRows}
+            dateRange={dateRange}
+            currentMemberId={member.memberId}
+            onExpandRange={expandDateRange}
+          />
         )}
         {activeTab === 'polls' && (
           <p className="text-gray-500 text-sm">Polls tab — coming soon</p>
