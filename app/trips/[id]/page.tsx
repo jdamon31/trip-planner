@@ -9,6 +9,8 @@ import { TripNotes } from '@/components/trip/TripNotes'
 import { TripLinks } from '@/components/trip/TripLinks'
 import { useAvailability } from '@/hooks/useAvailability'
 import { AvailabilityGrid } from '@/components/availability/AvailabilityGrid'
+import { usePolls } from '@/hooks/usePolls'
+import { PollList } from '@/components/polls/PollList'
 
 export default function TripPage() {
   const params = useParams<{ id: string }>()
@@ -16,6 +18,7 @@ export default function TripPage() {
   const router = useRouter()
   const { trip, members, loading } = useTrip(tripId)
   const { rows: availRows, dateRange, expandDateRange } = useAvailability(tripId)
+  const { polls, votes, createPoll, vote, deletePoll } = usePolls(tripId)
   const [activeTab, setActiveTab] = useState<Tab>('details')
   const [member, setMember] = useState<{ memberId: string; displayName: string } | null>(null)
 
@@ -62,7 +65,14 @@ export default function TripPage() {
           />
         )}
         {activeTab === 'polls' && (
-          <p className="text-gray-500 text-sm">Polls tab — coming soon</p>
+          <PollList
+            polls={polls}
+            votes={votes}
+            currentMemberId={member.memberId}
+            onVote={(pollId, optionId) => vote(pollId, member.memberId, optionId)}
+            onDelete={deletePoll}
+            onCreatePoll={(q, opts) => createPoll(q, opts, member.memberId)}
+          />
         )}
         {activeTab === 'expenses' && (
           <p className="text-gray-500 text-sm">Expenses tab — coming soon</p>
