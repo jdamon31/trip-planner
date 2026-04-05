@@ -4,6 +4,9 @@ import { useParams, useRouter } from 'next/navigation'
 import { useTrip } from '@/hooks/useTrip'
 import { getMemberFromStorage } from '@/hooks/useMember'
 import { TabBar, type Tab } from '@/components/ui/TabBar'
+import { TripHeader } from '@/components/trip/TripHeader'
+import { TripNotes } from '@/components/trip/TripNotes'
+import { TripLinks } from '@/components/trip/TripLinks'
 
 export default function TripPage() {
   const params = useParams<{ id: string }>()
@@ -39,7 +42,11 @@ export default function TripPage() {
 
       <main className="p-4">
         {activeTab === 'details' && (
-          <p className="text-gray-500 text-sm">Details tab — coming soon</p>
+          <>
+            <TripHeader trip={trip} />
+            <TripNotes tripId={tripId} initialNotes={trip.description} />
+            <TripLinks tripId={tripId} memberId={member.memberId} />
+          </>
         )}
         {activeTab === 'availability' && (
           <p className="text-gray-500 text-sm">Availability tab — coming soon</p>
