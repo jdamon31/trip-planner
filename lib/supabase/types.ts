@@ -1,16 +1,16 @@
 export type AvailabilityStatus = 'available' | 'maybe' | 'unavailable'
 
-export interface PollOption {
+export type PollOption = {
   id: string
   label: string
 }
 
-export interface ExpenseSplit {
+export type ExpenseSplit = {
   member_id: string
   amount: number
 }
 
-export interface Trip {
+export type Trip = {
   id: string
   name: string
   destination: string | null
@@ -19,21 +19,21 @@ export interface Trip {
   created_at: string
 }
 
-export interface Member {
+export type Member = {
   id: string
   trip_id: string
   display_name: string
   joined_at: string
 }
 
-export interface Availability {
+export type Availability = {
   id: string
   member_id: string
   date: string
   status: AvailabilityStatus
 }
 
-export interface Poll {
+export type Poll = {
   id: string
   trip_id: string
   created_by: string
@@ -42,14 +42,14 @@ export interface Poll {
   created_at: string
 }
 
-export interface Vote {
+export type Vote = {
   id: string
   poll_id: string
   member_id: string
   option_id: string
 }
 
-export interface Expense {
+export type Expense = {
   id: string
   trip_id: string
   paid_by: string
@@ -59,7 +59,7 @@ export interface Expense {
   created_at: string
 }
 
-export interface ItineraryItem {
+export type ItineraryItem = {
   id: string
   trip_id: string
   day: string | null
@@ -69,7 +69,7 @@ export interface ItineraryItem {
   created_at: string
 }
 
-export interface TripLink {
+export type TripLink = {
   id: string
   trip_id: string
   label: string
@@ -80,14 +80,17 @@ export interface TripLink {
 export type Database = {
   public: {
     Tables: {
-      trips: { Row: Trip; Insert: Omit<Trip, 'id' | 'created_at'>; Update: Partial<Trip> }
-      members: { Row: Member; Insert: Omit<Member, 'id' | 'joined_at'>; Update: Partial<Member> }
-      availability: { Row: Availability; Insert: Omit<Availability, 'id'>; Update: Partial<Availability> }
-      polls: { Row: Poll; Insert: Omit<Poll, 'id' | 'created_at'>; Update: Partial<Poll> }
-      votes: { Row: Vote; Insert: Omit<Vote, 'id'>; Update: Partial<Vote> }
-      expenses: { Row: Expense; Insert: Omit<Expense, 'id' | 'created_at'>; Update: Partial<Expense> }
-      itinerary_items: { Row: ItineraryItem; Insert: Omit<ItineraryItem, 'id' | 'created_at'>; Update: Partial<ItineraryItem> }
-      trip_links: { Row: TripLink; Insert: Omit<TripLink, 'id'>; Update: Partial<TripLink> }
+      trips: { Row: Trip; Insert: { name: string; destination?: string | null; description?: string | null; confirmed_date?: string | null }; Update: Partial<Trip>; Relationships: [] }
+      members: { Row: Member; Insert: Omit<Member, 'id' | 'joined_at'>; Update: Partial<Member>; Relationships: [] }
+      availability: { Row: Availability; Insert: Omit<Availability, 'id'>; Update: Partial<Availability>; Relationships: [] }
+      polls: { Row: Poll; Insert: Omit<Poll, 'id' | 'created_at'>; Update: Partial<Poll>; Relationships: [] }
+      votes: { Row: Vote; Insert: Omit<Vote, 'id'>; Update: Partial<Vote>; Relationships: [] }
+      expenses: { Row: Expense; Insert: Omit<Expense, 'id' | 'created_at'>; Update: Partial<Expense>; Relationships: [] }
+      itinerary_items: { Row: ItineraryItem; Insert: Omit<ItineraryItem, 'id' | 'created_at'>; Update: Partial<ItineraryItem>; Relationships: [] }
+      trip_links: { Row: TripLink; Insert: Omit<TripLink, 'id'>; Update: Partial<TripLink>; Relationships: [] }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
   }
 }
