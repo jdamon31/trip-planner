@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTrip } from '@/hooks/useTrip'
-import { getMemberFromStorage } from '@/hooks/useMember'
+import { getMemberFromStorage, saveMemberToStorage } from '@/hooks/useMember'
+import { useAuth } from '@/contexts/AuthContext'
 import { TabBar, type Tab } from '@/components/ui/TabBar'
 import { TripHeader } from '@/components/trip/TripHeader'
 import { TripNotes } from '@/components/trip/TripNotes'
@@ -22,6 +23,7 @@ export default function TripPage() {
   const params = useParams<{ id: string }>()
   const tripId = params.id
   const router = useRouter()
+  const { user } = useAuth()
   const { trip, members, loading } = useTrip(tripId)
   const { rows: availRows, dateRange, expandDateRange } = useAvailability(tripId)
   const { polls, votes, createPoll, vote, deletePoll } = usePolls(tripId)
@@ -31,18 +33,46 @@ export default function TripPage() {
   const [member, setMember] = useState<{ memberId: string; displayName: string } | null>(null)
 
   useEffect(() => {
+    if (loading) return
+
+    // Check localStorage first
     const stored = getMemberFromStorage(tripId)
-    if (!stored) {
-      router.replace(`/trips/${tripId}/join`)
-    } else {
+    if (stored) {
       setMember(stored)
+      return
     }
-  }, [tripId, router])
+
+    // If signed in, check if already a member via user_id
+    if (user) {
+      const existing = members.find(m => m.user_id === user.id)
+      if (existing) {
+        saveMemberToStorage(tripId, { memberId: existing.id, displayName: existing.display_name })
+        setMember({ memberId: existing.id, displayName: existing.display_name })
+        return
+      }
+    }
+
+    router.replace(`/trips/${tripId}/join`)
+  }, [tripId, router, user, loading, members])
+
+  async function handleLeave() {
+    if (!member) return
+    await fetch(`/api/trips/${tripId}/members/${member.memberId}`, { method: 'DELETE' })
+    localStorage.removeItem(`trip_member_${tripId}`)
+    router.replace('/')
+  }
+
+  async function handleDelete() {
+    await fetch(`/api/trips/${tripId}`, { method: 'DELETE' })
+    router.replace('/')
+  }
+
+  const isCreator = !!(trip?.created_by_user_id && user?.id === trip.created_by_user_id)
 
   if (loading || !trip || !member) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500">Loading…</p>
       </div>
     )
   }
@@ -75,7 +105,12 @@ export default function TripPage() {
       <main className="p-4">
         {activeTab === 'details' && (
           <>
-            <TripHeader trip={trip} />
+            <TripHeader
+              trip={trip}
+              isCreator={isCreator}
+              onLeave={handleLeave}
+              onDelete={handleDelete}
+            />
             <TripNotes tripId={tripId} initialNotes={trip.description} />
             <TripLinks tripId={tripId} memberId={member.memberId} />
             <div className="mt-2">
