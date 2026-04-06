@@ -17,6 +17,8 @@ export type Trip = {
   description: string | null
   confirmed_date: string | null
   created_at: string
+  created_by_user_id: string | null
+  photo_url: string | null
 }
 
 export type Member = {
@@ -24,6 +26,7 @@ export type Member = {
   trip_id: string
   display_name: string
   joined_at: string
+  user_id: string | null
 }
 
 export type Availability = {
@@ -40,6 +43,7 @@ export type Poll = {
   question: string
   options: PollOption[]
   created_at: string
+  allow_multiple: boolean
 }
 
 export type Vote = {
@@ -80,7 +84,7 @@ export type TripLink = {
 export type Database = {
   public: {
     Tables: {
-      trips: { Row: Trip; Insert: { name: string; destination?: string | null; description?: string | null; confirmed_date?: string | null }; Update: Partial<Trip>; Relationships: [] }
+      trips: { Row: Trip; Insert: { name: string; destination?: string | null; description?: string | null; confirmed_date?: string | null; created_by_user_id?: string | null; photo_url?: string | null }; Update: Partial<Trip>; Relationships: [] }
       members: { Row: Member; Insert: Omit<Member, 'id' | 'joined_at'>; Update: Partial<Member>; Relationships: [] }
       availability: { Row: Availability; Insert: Omit<Availability, 'id'>; Update: Partial<Availability>; Relationships: [] }
       polls: { Row: Poll; Insert: Omit<Poll, 'id' | 'created_at'>; Update: Partial<Poll>; Relationships: [] }
