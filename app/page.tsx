@@ -1,30 +1,67 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
+import { SignInButtons } from '@/components/auth/SignInButtons'
+import { getSupabaseClient } from '@/lib/supabase/client'
+import type { Trip } from '@/lib/supabase/types'
+
+type MyTrip = Trip & { memberCount: number }
 
 export default function HomePage() {
   const router = useRouter()
+  const { user, loading: authLoading, signOut } = useAuth()
   const [name, setName] = useState('')
   const [destination, setDestination] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [creating, setCreating] = useState(false)
+  const [createError, setCreateError] = useState('')
+  const [myTrips, setMyTrips] = useState<MyTrip[]>([])
+  const [tripsLoading, setTripsLoading] = useState(false)
+  const [showSignIn, setShowSignIn] = useState(false)
+
+  useEffect(() => {
+    if (!user) {
+      setMyTrips([])
+      return
+    }
+    setTripsLoading(true)
+    const supabase = getSupabaseClient()
+    supabase
+      .from('members')
+      .select('trip_id, trips(*)')
+      .eq('user_id', user.id)
+      .then(({ data }) => {
+        if (!data) { setTripsLoading(false); return }
+        const trips = data.map((row: any) => row.trips as Trip).filter(Boolean)
+        // Fetch member counts
+        Promise.all(
+          trips.map(trip =>
+            supabase.from('members').select('id', { count: 'exact', head: true }).eq('trip_id', trip.id)
+              .then(({ count }) => ({ ...trip, memberCount: count ?? 0 }))
+          )
+        ).then(results => {
+          setMyTrips(results)
+          setTripsLoading(false)
+        })
+      })
+  }, [user])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
-    setLoading(true)
-    setError('')
+    setCreating(true)
+    setCreateError('')
 
     const res = await fetch('/api/trips', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, destination }),
+      body: JSON.stringify({ name, destination, createdByUserId: user?.id ?? null }),
     })
 
     const data = await res.json()
     if (!res.ok) {
-      setError(data.error || 'Failed to create trip')
-      setLoading(false)
+      setCreateError(data.error || 'Failed to create trip')
+      setCreating(false)
       return
     }
 
@@ -32,10 +69,73 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-2">Trip Planner</h1>
-        <p className="text-gray-500 text-center mb-8">Plan trips with your group. No sign-up needed.</p>
+    <main className="min-h-screen p-6">
+      {/* Header */}
+      <div className="w-full max-w-md mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Trip Planner</h1>
+          {!authLoading && (
+            user ? (
+              <button
+                onClick={signOut}
+                className="text-sm text-gray-500 border rounded-full px-3 py-1.5 active:bg-gray-50"
+              >
+                Sign out
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowSignIn(s => !s)}
+                className="text-sm text-blue-600 font-medium border border-blue-200 rounded-full px-3 py-1.5 active:bg-blue-50"
+              >
+                Sign in
+              </button>
+            )
+          )}
+        </div>
+
+        {/* Sign-in panel */}
+        {showSignIn && !user && (
+          <div className="bg-white rounded-2xl shadow-sm border p-6 mb-6">
+            <p className="text-sm text-gray-500 mb-4 text-center">Sign in to see your trips across devices</p>
+            <SignInButtons redirectTo="/" />
+          </div>
+        )}
+
+        {/* My Trips */}
+        {user && (
+          <section className="mb-8">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">My Trips</h2>
+            {tripsLoading ? (
+              <p className="text-sm text-gray-400 py-4">Loading your trips…</p>
+            ) : myTrips.length === 0 ? (
+              <p className="text-sm text-gray-400 py-4">No trips yet — create one below.</p>
+            ) : (
+              <div className="space-y-2">
+                {myTrips.map(trip => (
+                  <button
+                    key={trip.id}
+                    onClick={() => router.push(`/trips/${trip.id}`)}
+                    className="w-full bg-white rounded-xl border p-4 text-left active:bg-gray-50"
+                  >
+                    <div className="font-semibold text-gray-900">{trip.name}</div>
+                    {trip.destination && (
+                      <div className="text-sm text-gray-500 mt-0.5">📍 {trip.destination}</div>
+                    )}
+                    <div className="text-xs text-gray-400 mt-1">
+                      {trip.memberCount} member{trip.memberCount !== 1 ? 's' : ''}
+                      {trip.confirmed_date ? ` · ${trip.confirmed_date}` : ''}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Create Trip */}
+        <p className="text-gray-500 text-sm text-center mb-6">
+          {user ? 'Start a new trip' : 'Plan trips with your group. No sign-up needed.'}
+        </p>
 
         <form onSubmit={handleCreate} className="bg-white rounded-2xl shadow-sm border p-6 space-y-4">
           <div>
@@ -61,14 +161,14 @@ export default function HomePage() {
             />
           </div>
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {createError && <p className="text-red-600 text-sm">{createError}</p>}
 
           <button
             type="submit"
-            disabled={loading || !name.trim()}
+            disabled={creating || !name.trim()}
             className="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold text-base disabled:opacity-50 active:bg-blue-700"
           >
-            {loading ? 'Creating...' : 'Create Trip'}
+            {creating ? 'Creating…' : 'Create Trip'}
           </button>
         </form>
       </div>
