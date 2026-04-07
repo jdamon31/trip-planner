@@ -113,6 +113,18 @@ export default function TripPage() {
             />
             <TripNotes tripId={tripId} initialNotes={trip.description} />
             <TripLinks tripId={tripId} memberId={member.memberId} />
+            <div className="mt-4 bg-white rounded-xl border p-4 mb-4">
+              <h3 className="font-semibold text-sm text-gray-700 mb-3">People ({members.length})</h3>
+              <ol className="space-y-2 list-none">
+                {members.map((m, i) => (
+                  <li key={m.id} className="flex items-center gap-2 text-sm text-gray-700">
+                    <span className="text-gray-400 w-5 text-right shrink-0">{i + 1}.</span>
+                    <span>{m.display_name}</span>
+                    {m.id === member.memberId && <span className="text-xs text-blue-500">(you)</span>}
+                  </li>
+                ))}
+              </ol>
+            </div>
             <div className="mt-2">
               <h3 className="font-semibold text-sm text-gray-700 mb-3">Itinerary</h3>
               <ItineraryList tripId={tripId} />

@@ -12,6 +12,7 @@ export function TripPhoto({ tripId, photoUrl, tripName }: TripPhotoProps) {
   const [current, setCurrent] = useState<string | null>(photoUrl)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPreview, setShowPreview] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const initials = tripName
@@ -58,9 +59,15 @@ export function TripPhoto({ tripId, photoUrl, tripName }: TripPhotoProps) {
   return (
     <div className="relative shrink-0">
       <button
-        onClick={() => inputRef.current?.click()}
+        onClick={() => {
+          if (current && !uploading) {
+            setShowPreview(true)
+          } else {
+            inputRef.current?.click()
+          }
+        }}
         className="w-16 h-16 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center border-2 border-white shadow"
-        aria-label="Change trip photo"
+        aria-label={current ? 'View trip photo' : 'Upload trip photo'}
         disabled={uploading}
       >
         {current ? (
@@ -83,6 +90,35 @@ export function TripPhoto({ tripId, photoUrl, tripName }: TripPhotoProps) {
       />
       {error && (
         <p className="absolute top-full left-0 mt-1 text-xs text-red-500 whitespace-nowrap">{error}</p>
+      )}
+
+      {/* Full-screen photo preview */}
+      {showPreview && current && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center"
+          onClick={() => setShowPreview(false)}
+        >
+          <img
+            src={current}
+            alt={tripName}
+            className="max-w-[90vw] max-h-[70vh] rounded-xl object-contain"
+            onClick={e => e.stopPropagation()}
+          />
+          <div className="mt-6 flex flex-col items-center gap-3" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => { setShowPreview(false); inputRef.current?.click() }}
+              className="bg-white text-gray-900 font-semibold rounded-full px-6 py-2.5 text-sm active:bg-gray-100"
+            >
+              Change photo
+            </button>
+            <button
+              onClick={() => setShowPreview(false)}
+              className="text-white/70 text-sm"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

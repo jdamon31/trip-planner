@@ -8,6 +8,10 @@ import type { Trip } from '@/lib/supabase/types'
 
 type MyTrip = Trip & { memberCount: number }
 
+function tripInitials(name: string) {
+  return name.split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('')
+}
+
 export default function HomePage() {
   const router = useRouter()
   const { user, loading: authLoading, signOut } = useAuth()
@@ -115,15 +119,23 @@ export default function HomePage() {
                   <button
                     key={trip.id}
                     onClick={() => router.push(`/trips/${trip.id}`)}
-                    className="w-full bg-white rounded-xl border p-4 text-left active:bg-gray-50"
+                    className="w-full bg-white rounded-xl border p-4 text-left active:bg-gray-50 flex items-center gap-3"
                   >
-                    <div className="font-semibold text-gray-900">{trip.name}</div>
-                    {trip.destination && (
-                      <div className="text-sm text-gray-500 mt-0.5">📍 {trip.destination}</div>
-                    )}
-                    <div className="text-xs text-gray-400 mt-1">
-                      {trip.memberCount} member{trip.memberCount !== 1 ? 's' : ''}
-                      {trip.confirmed_date ? ` · ${trip.confirmed_date}` : ''}
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center shrink-0">
+                      {trip.photo_url
+                        ? <img src={trip.photo_url} alt={trip.name} className="w-full h-full object-cover" />
+                        : <span className="text-blue-600 font-bold text-sm">{tripInitials(trip.name)}</span>
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-gray-900">{trip.name}</div>
+                      {trip.destination && (
+                        <div className="text-sm text-gray-500 mt-0.5">📍 {trip.destination}</div>
+                      )}
+                      <div className="text-xs text-gray-400 mt-1">
+                        {trip.memberCount} member{trip.memberCount !== 1 ? 's' : ''}
+                        {trip.confirmed_date ? ` · ${trip.confirmed_date}` : ''}
+                      </div>
                     </div>
                   </button>
                 ))}
