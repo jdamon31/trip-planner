@@ -6,6 +6,7 @@ describe('type shapes', () => {
       id: '1', name: 'Test', destination: null, description: null,
       confirmed_date: null, created_at: '2026-01-01',
       created_by_user_id: 'user-abc', photo_url: null,
+      date_ranges: [],
     }
     expect(t.created_by_user_id).toBe('user-abc')
     expect(t.photo_url).toBeNull()

@@ -1,34 +1,36 @@
 'use client'
-import { useMemo } from 'react'
-import { eachDayOfInterval, format, parseISO } from 'date-fns'
+import { useMemo, useState } from 'react'
+import { format, parseISO } from 'date-fns'
 import { AvailabilityCell } from './AvailabilityCell'
 import { BestDateBanner } from './BestDateBanner'
 import { DateRangeProposer } from './DateRangeProposer'
 import { getBestDates } from '@/lib/utils/availability'
 import { getSupabaseClient } from '@/lib/supabase/client'
+import { BottomSheet } from '@/components/ui/BottomSheet'
 import type { Member, Availability, AvailabilityStatus } from '@/lib/supabase/types'
 
-interface AvailabilityGridProps {
+type AvailabilityGridProps = {
   tripId: string
   members: Member[]
   rows: Availability[]
-  dateRange: { start: string; end: string } | null
+  dates: Date[]
   currentMemberId: string
   onExpandRange: (start: string, end: string) => void
+  onRemoveDate: (dateStr: string, memberIds: string[]) => Promise<void>
 }
 
 export function AvailabilityGrid({
   tripId,
   members,
   rows,
-  dateRange,
+  dates,
   currentMemberId,
   onExpandRange,
+  onRemoveDate,
 }: AvailabilityGridProps) {
-  const dates = useMemo(() => {
-    if (!dateRange) return []
-    return eachDayOfInterval({ start: parseISO(dateRange.start), end: parseISO(dateRange.end) })
-  }, [dateRange])
+  const [pendingDeleteDate, setPendingDeleteDate] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [pressTimer, setPressTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
 
   const bestDates = useMemo(() => getBestDates(rows, members.length), [rows, members.length])
   const bestDateSet = useMemo(() => new Set(bestDates.map(d => d.date)), [bestDates])
@@ -58,6 +60,26 @@ export function AvailabilityGrid({
     await supabase.from('trips').update({ confirmed_date: date }).eq('id', tripId)
   }
 
+  async function handleDeleteDate() {
+    if (!pendingDeleteDate) return
+    setDeleting(true)
+    await onRemoveDate(pendingDeleteDate, members.map(m => m.id))
+    setDeleting(false)
+    setPendingDeleteDate(null)
+  }
+
+  function startLongPress(dateKey: string) {
+    const timer = setTimeout(() => setPendingDeleteDate(dateKey), 500)
+    setPressTimer(timer)
+  }
+
+  function cancelLongPress() {
+    if (pressTimer) {
+      clearTimeout(pressTimer)
+      setPressTimer(null)
+    }
+  }
+
   if (dates.length === 0) {
     return (
       <div>
@@ -82,9 +104,23 @@ export function AvailabilityGrid({
               {dates.map(date => {
                 const key = format(date, 'yyyy-MM-dd')
                 return (
-                  <th key={key} className={`text-center pb-2 px-1 ${bestDateSet.has(key) ? 'bg-blue-50' : ''}`}>
+                  <th
+                    key={key}
+                    className={`text-center pb-2 px-1 relative group ${bestDateSet.has(key) ? 'bg-blue-50' : ''}`}
+                    onTouchStart={() => startLongPress(key)}
+                    onTouchEnd={cancelLongPress}
+                    onTouchCancel={cancelLongPress}
+                  >
                     <div className="text-xs font-medium text-gray-500">{format(date, 'MMM')}</div>
                     <div className="text-sm font-bold text-gray-800">{format(date, 'd')}</div>
+                    {/* Desktop: show ✕ on hover */}
+                    <button
+                      onClick={() => setPendingDeleteDate(key)}
+                      className="hidden group-hover:flex absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full items-center justify-center text-xs leading-none"
+                      aria-label={`Remove ${format(date, 'MMM d')}`}
+                    >
+                      ✕
+                    </button>
                   </th>
                 )
               })}
@@ -118,6 +154,32 @@ export function AvailabilityGrid({
           </tbody>
         </table>
       </div>
+
+      <BottomSheet
+        open={pendingDeleteDate !== null}
+        onClose={() => setPendingDeleteDate(null)}
+        title="Remove date?"
+      >
+        <div className="space-y-4 pb-2">
+          <p className="text-sm text-gray-600">
+            Remove <strong>{pendingDeleteDate ? format(parseISO(pendingDeleteDate), 'MMMM d, yyyy') : ''}</strong> from the trip?
+            Everyone's availability for this date will be deleted.
+          </p>
+          <button
+            onClick={handleDeleteDate}
+            disabled={deleting}
+            className="w-full bg-red-600 text-white rounded-lg py-3 font-semibold text-sm disabled:opacity-50 active:bg-red-700"
+          >
+            {deleting ? 'Removing…' : 'Remove date'}
+          </button>
+          <button
+            onClick={() => setPendingDeleteDate(null)}
+            className="w-full border rounded-lg py-3 text-sm"
+          >
+            Cancel
+          </button>
+        </div>
+      </BottomSheet>
     </div>
   )
 }

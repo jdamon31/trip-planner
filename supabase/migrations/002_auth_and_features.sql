@@ -20,3 +20,6 @@ ALTER TABLE votes DROP CONSTRAINT IF EXISTS votes_poll_id_member_id_key;
 ALTER TABLE votes
   ADD CONSTRAINT votes_poll_member_option_unique
   UNIQUE (poll_id, member_id, option_id);
+
+-- date_ranges: store explicit proposed date windows (non-contiguous support)
+ALTER TABLE trips ADD COLUMN IF NOT EXISTS date_ranges JSONB DEFAULT '[]';

@@ -1,5 +1,10 @@
 export type AvailabilityStatus = 'available' | 'maybe' | 'unavailable'
 
+export type DateRangeEntry = {
+  start: string
+  end: string
+}
+
 export type PollOption = {
   id: string
   label: string
@@ -19,6 +24,7 @@ export type Trip = {
   created_at: string
   created_by_user_id: string | null
   photo_url: string | null
+  date_ranges: DateRangeEntry[]
 }
 
 export type Member = {
@@ -84,7 +90,7 @@ export type TripLink = {
 export type Database = {
   public: {
     Tables: {
-      trips: { Row: Trip; Insert: { name: string; destination?: string | null; description?: string | null; confirmed_date?: string | null; created_by_user_id?: string | null; photo_url?: string | null }; Update: Partial<Trip>; Relationships: [] }
+      trips: { Row: Trip; Insert: { name: string; destination?: string | null; description?: string | null; confirmed_date?: string | null; created_by_user_id?: string | null; photo_url?: string | null; date_ranges?: DateRangeEntry[] }; Update: Partial<Trip>; Relationships: [] }
       members: { Row: Member; Insert: Omit<Member, 'id' | 'joined_at'>; Update: Partial<Member>; Relationships: [] }
       availability: { Row: Availability; Insert: Omit<Availability, 'id'>; Update: Partial<Availability>; Relationships: [] }
       polls: { Row: Poll; Insert: Omit<Poll, 'id' | 'created_at'>; Update: Partial<Poll>; Relationships: [] }

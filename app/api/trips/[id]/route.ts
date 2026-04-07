@@ -8,15 +8,18 @@ export async function PATCH(
   const { id } = await params
   const body = await request.json()
 
-  // Only allow updating photo_url via this endpoint
-  if (typeof body.photo_url === 'undefined') {
+  const updateFields: Record<string, unknown> = {}
+  if (typeof body.photo_url !== 'undefined') updateFields.photo_url = body.photo_url
+  if (typeof body.date_ranges !== 'undefined') updateFields.date_ranges = body.date_ranges
+
+  if (Object.keys(updateFields).length === 0) {
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
   }
 
   const supabase = getSupabaseServerClient()
   const { error } = await supabase
     .from('trips')
-    .update({ photo_url: body.photo_url })
+    .update(updateFields)
     .eq('id', id)
 
   if (error) {

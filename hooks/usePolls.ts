@@ -49,6 +49,7 @@ export function usePolls(tripId: string) {
       created_by: createdBy,
       question,
       options: options.map((label, i) => ({ id: String(i), label })),
+      allow_multiple: false,
     })
   }
 

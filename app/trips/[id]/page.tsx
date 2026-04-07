@@ -25,7 +25,7 @@ export default function TripPage() {
   const router = useRouter()
   const { user } = useAuth()
   const { trip, members, loading } = useTrip(tripId)
-  const { rows: availRows, dateRange, expandDateRange } = useAvailability(tripId)
+  const { rows: availRows, dates, expandDateRange, removeDate } = useAvailability(tripId)
   const { polls, votes, createPoll, vote, deletePoll } = usePolls(tripId)
   const { expenses, addExpense } = useExpenses(tripId)
   const [activeTab, setActiveTab] = useState<Tab>('details')
@@ -124,9 +124,10 @@ export default function TripPage() {
             tripId={tripId}
             members={members}
             rows={availRows}
-            dateRange={dateRange}
+            dates={dates}
             currentMemberId={member.memberId}
             onExpandRange={expandDateRange}
+            onRemoveDate={removeDate}
           />
         )}
         {activeTab === 'polls' && (
