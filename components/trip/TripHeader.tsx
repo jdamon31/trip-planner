@@ -34,9 +34,10 @@ export function TripHeader({ trip, isCreator, onLeave, onDelete }: TripHeaderPro
           onDelete={onDelete}
         />
       </div>
-      <a href="/" className="mt-3 block text-sm text-blue-600 font-medium">
-        + Create new trip
-      </a>
+      <div className="mt-3 flex items-center gap-4">
+        <a href="/" className="text-sm text-blue-600 font-medium">← My trips</a>
+        <a href="/" className="text-sm text-gray-400">+ Create new trip</a>
+      </div>
     </div>
   )
 }
