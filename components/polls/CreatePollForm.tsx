@@ -1,14 +1,15 @@
 'use client'
 import { useState } from 'react'
 
-interface CreatePollFormProps {
-  onSubmit: (question: string, options: string[]) => Promise<void>
+type CreatePollFormProps = {
+  onSubmit: (question: string, options: string[], allowMultiple: boolean) => Promise<void>
   onCancel: () => void
 }
 
 export function CreatePollForm({ onSubmit, onCancel }: CreatePollFormProps) {
   const [question, setQuestion] = useState('')
   const [options, setOptions] = useState(['', ''])
+  const [allowMultiple, setAllowMultiple] = useState(false)
   const [loading, setLoading] = useState(false)
 
   function updateOption(i: number, value: string) {
@@ -20,7 +21,7 @@ export function CreatePollForm({ onSubmit, onCancel }: CreatePollFormProps) {
     const validOptions = options.filter(o => o.trim())
     if (!question.trim() || validOptions.length < 2) return
     setLoading(true)
-    await onSubmit(question.trim(), validOptions)
+    await onSubmit(question.trim(), validOptions, allowMultiple)
     setLoading(false)
   }
 
@@ -50,6 +51,17 @@ export function CreatePollForm({ onSubmit, onCancel }: CreatePollFormProps) {
           + Add option
         </button>
       </div>
+
+      <label className="flex items-center gap-3 cursor-pointer">
+        <div
+          onClick={() => setAllowMultiple(v => !v)}
+          className={`relative w-10 h-6 rounded-full transition-colors ${allowMultiple ? 'bg-blue-600' : 'bg-gray-200'}`}
+        >
+          <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${allowMultiple ? 'translate-x-5' : 'translate-x-1'}`} />
+        </div>
+        <span className="text-sm text-gray-700">Allow multiple selections</span>
+      </label>
+
       <div className="flex gap-2 pt-1">
         <button type="submit" disabled={loading} className="flex-1 bg-blue-600 text-white rounded-lg py-2.5 text-sm font-semibold disabled:opacity-50">
           Create Poll

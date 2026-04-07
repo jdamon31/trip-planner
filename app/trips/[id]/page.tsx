@@ -135,9 +135,10 @@ export default function TripPage() {
             polls={polls}
             votes={votes}
             currentMemberId={member.memberId}
+            memberCount={members.length}
             onVote={(pollId, optionId) => vote(pollId, member.memberId, optionId)}
             onDelete={deletePoll}
-            onCreatePoll={(q, opts) => createPoll(q, opts, member.memberId)}
+            onCreatePoll={(q, opts, allowMultiple) => createPoll(q, opts, member.memberId, allowMultiple)}
           />
         )}
         {activeTab === 'expenses' && (

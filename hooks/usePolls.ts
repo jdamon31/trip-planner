@@ -42,23 +42,37 @@ export function usePolls(tripId: string) {
     return () => { supabase.removeChannel(channel) }
   }, [tripId])
 
-  async function createPoll(question: string, options: string[], createdBy: string) {
+  async function createPoll(question: string, options: string[], createdBy: string, allowMultiple = false) {
     const supabase = getSupabaseClient()
     await supabase.from('polls').insert({
       trip_id: tripId,
       created_by: createdBy,
       question,
       options: options.map((label, i) => ({ id: String(i), label })),
-      allow_multiple: false,
+      allow_multiple: allowMultiple,
     })
   }
 
   async function vote(pollId: string, memberId: string, optionId: string) {
     const supabase = getSupabaseClient()
-    await supabase.from('votes').upsert(
-      { poll_id: pollId, member_id: memberId, option_id: optionId },
-      { onConflict: 'poll_id,member_id' }
-    )
+    const poll = polls.find(p => p.id === pollId)
+    if (poll?.allow_multiple) {
+      // Multi-select: toggle — delete if already voted for this option, insert otherwise
+      const existing = votes.find(
+        v => v.poll_id === pollId && v.member_id === memberId && v.option_id === optionId
+      )
+      if (existing) {
+        await supabase.from('votes').delete().eq('id', existing.id)
+      } else {
+        await supabase.from('votes').insert({ poll_id: pollId, member_id: memberId, option_id: optionId })
+      }
+    } else {
+      // Single-select: upsert (replaces previous vote)
+      await supabase.from('votes').upsert(
+        { poll_id: pollId, member_id: memberId, option_id: optionId },
+        { onConflict: 'poll_id,member_id' }
+      )
+    }
   }
 
   async function deletePoll(pollId: string) {
