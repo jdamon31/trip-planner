@@ -23,7 +23,7 @@ export default function TripPage() {
   const params = useParams<{ id: string }>()
   const tripId = params.id
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const { trip, members, loading } = useTrip(tripId)
   const { rows: availRows, dates, expandDateRange, removeDate } = useAvailability(tripId)
   const { polls, votes, createPoll, vote, deletePoll } = usePolls(tripId)
@@ -33,7 +33,7 @@ export default function TripPage() {
   const [member, setMember] = useState<{ memberId: string; displayName: string } | null>(null)
 
   useEffect(() => {
-    if (loading) return
+    if (loading || authLoading) return
 
     // Check localStorage first
     const stored = getMemberFromStorage(tripId)
@@ -53,7 +53,7 @@ export default function TripPage() {
     }
 
     router.replace(`/trips/${tripId}/join`)
-  }, [tripId, router, user, loading, members])
+  }, [tripId, router, user, loading, authLoading, members])
 
   async function handleLeave() {
     if (!member) return
@@ -69,7 +69,7 @@ export default function TripPage() {
 
   const isCreator = !!(trip?.created_by_user_id && user?.id === trip.created_by_user_id)
 
-  if (loading || !trip || !member) {
+  if (loading || authLoading || !trip || !member) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500">Loading…</p>

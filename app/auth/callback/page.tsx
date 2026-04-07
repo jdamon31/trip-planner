@@ -13,7 +13,8 @@ function AuthCallbackInner() {
     exchanged.current = true
 
     const code = searchParams.get('code')
-    const next = searchParams.get('next') ?? '/'
+    const rawNext = searchParams.get('next') ?? '/'
+    const next = rawNext.startsWith('/') ? rawNext : '/'
 
     if (!code) {
       router.replace(next)
