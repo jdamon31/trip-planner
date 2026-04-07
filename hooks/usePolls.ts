@@ -67,11 +67,18 @@ export function usePolls(tripId: string) {
         await supabase.from('votes').insert({ poll_id: pollId, member_id: memberId, option_id: optionId })
       }
     } else {
-      // Single-select: upsert (replaces previous vote)
-      await supabase.from('votes').upsert(
-        { poll_id: pollId, member_id: memberId, option_id: optionId },
-        { onConflict: 'poll_id,member_id' }
-      )
+      // single-select: delete all existing votes for this member+poll, then insert new
+      await supabase
+        .from('votes')
+        .delete()
+        .eq('poll_id', pollId)
+        .eq('member_id', memberId)
+
+      await supabase.from('votes').insert({
+        poll_id: pollId,
+        member_id: memberId,
+        option_id: optionId,
+      })
     }
   }
 
