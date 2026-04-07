@@ -11,6 +11,7 @@ type TripPhotoProps = {
 export function TripPhoto({ tripId, photoUrl, tripName }: TripPhotoProps) {
   const [current, setCurrent] = useState<string | null>(photoUrl)
   const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const initials = tripName
@@ -23,15 +24,19 @@ export function TripPhoto({ tripId, photoUrl, tripName }: TripPhotoProps) {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
+    setError(null)
 
     const supabase = getSupabaseClient()
-    const path = `${tripId}/${Date.now()}-${file.name}`
+    // Sanitise filename — remove spaces and special characters
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+    const path = `${tripId}/${Date.now()}-${safeName}`
 
     const { error: uploadError } = await supabase.storage
       .from('trip-photos')
       .upload(path, file, { upsert: true })
 
     if (uploadError) {
+      setError(uploadError.message)
       setUploading(false)
       return
     }
@@ -76,6 +81,9 @@ export function TripPhoto({ tripId, photoUrl, tripName }: TripPhotoProps) {
         className="hidden"
         onChange={handleFileChange}
       />
+      {error && (
+        <p className="absolute top-full left-0 mt-1 text-xs text-red-500 whitespace-nowrap">{error}</p>
+      )}
     </div>
   )
 }
