@@ -21,8 +21,11 @@ export function CreatePollForm({ onSubmit, onCancel }: CreatePollFormProps) {
     const validOptions = options.filter(o => o.trim())
     if (!question.trim() || validOptions.length < 2) return
     setLoading(true)
-    await onSubmit(question.trim(), validOptions, allowMultiple)
-    setLoading(false)
+    try {
+      await onSubmit(question.trim(), validOptions, allowMultiple)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

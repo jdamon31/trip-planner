@@ -48,7 +48,7 @@ export function usePolls(tripId: string) {
       trip_id: tripId,
       created_by: createdBy,
       question,
-      options: options.map((label, i) => ({ id: String(i), label })),
+      options: options.map(label => ({ id: crypto.randomUUID(), label })),
       allow_multiple: allowMultiple,
     })
   }
