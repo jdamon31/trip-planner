@@ -60,6 +60,7 @@ export function usePolls(tripId: string) {
       options: options.map(label => ({ id: crypto.randomUUID(), label })),
       allow_multiple: allowMultiple,
     })
+    await load()
   }
 
   async function vote(pollId: string, memberId: string, optionId: string) {
@@ -88,11 +89,13 @@ export function usePolls(tripId: string) {
         option_id: optionId,
       })
     }
+    await load()
   }
 
   async function deletePoll(pollId: string) {
     const supabase = getSupabaseClient()
     await supabase.from('polls').delete().eq('id', pollId)
+    await load()
   }
 
   return { polls, votes, createPoll, vote, deletePoll, refetchPolls: load }
