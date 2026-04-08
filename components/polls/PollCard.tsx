@@ -1,7 +1,5 @@
 'use client'
-import { useState } from 'react'
 import type { Poll, Vote, PollOption } from '@/lib/supabase/types'
-import { BottomSheet } from '@/components/ui/BottomSheet'
 
 type PollCardProps = {
   poll: Poll
@@ -9,11 +7,10 @@ type PollCardProps = {
   currentMemberId: string
   memberCount: number
   onVote: (pollId: string, optionId: string) => void
-  onDelete: (pollId: string) => void
+  onRequestDelete: (poll: Poll) => void
 }
 
-export function PollCard({ poll, votes, currentMemberId, memberCount, onVote, onDelete }: PollCardProps) {
-  const [confirmDelete, setConfirmDelete] = useState(false)
+export function PollCard({ poll, votes, currentMemberId, memberCount, onVote, onRequestDelete }: PollCardProps) {
   const pollVotes = votes.filter(v => v.poll_id === poll.id)
   const myVotes = pollVotes.filter(v => v.member_id === currentMemberId)
   const hasVoted = myVotes.length > 0
@@ -30,7 +27,7 @@ export function PollCard({ poll, votes, currentMemberId, memberCount, onVote, on
       <div className="flex items-start justify-between mb-1">
         <h3 className="font-semibold text-gray-800 flex-1">{poll.question}</h3>
         {poll.created_by === currentMemberId && (
-          <button onClick={() => setConfirmDelete(true)} className="text-gray-400 text-sm ml-2 shrink-0" aria-label="Delete poll">✕</button>
+          <button onClick={() => onRequestDelete(poll)} className="text-gray-400 text-sm ml-2 shrink-0" aria-label="Delete poll">✕</button>
         )}
       </div>
       {poll.allow_multiple && (
@@ -76,25 +73,6 @@ export function PollCard({ poll, votes, currentMemberId, memberCount, onVote, on
         </p>
       )}
 
-      <BottomSheet open={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete poll?">
-        <div className="space-y-4 pb-2">
-          <p className="text-sm text-gray-600">
-            This will permanently delete &ldquo;<strong>{poll.question}</strong>&rdquo; and all votes.
-          </p>
-          <button
-            onClick={() => { onDelete(poll.id); setConfirmDelete(false) }}
-            className="w-full bg-red-600 text-white rounded-lg py-3 font-semibold text-sm active:bg-red-700"
-          >
-            Delete poll
-          </button>
-          <button
-            onClick={() => setConfirmDelete(false)}
-            className="w-full border rounded-lg py-3 text-sm text-gray-700"
-          >
-            Cancel
-          </button>
-        </div>
-      </BottomSheet>
     </div>
   )
 }
