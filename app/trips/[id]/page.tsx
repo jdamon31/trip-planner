@@ -26,9 +26,14 @@ export default function TripPage() {
   const { user, loading: authLoading } = useAuth()
   const { trip, members, loading } = useTrip(tripId)
   const { rows: availRows, dates, expandDateRange, removeDate } = useAvailability(tripId)
-  const { polls, votes, createPoll, vote, deletePoll } = usePolls(tripId)
+  const { polls, votes, createPoll, vote, deletePoll, refetchPolls } = usePolls(tripId)
   const { expenses, addExpense } = useExpenses(tripId)
   const [activeTab, setActiveTab] = useState<Tab>('details')
+
+  function handleTabChange(tab: Tab) {
+    if (tab === 'polls') refetchPolls()
+    setActiveTab(tab)
+  }
   const [showAddExpense, setShowAddExpense] = useState(false)
   const [member, setMember] = useState<{ memberId: string; displayName: string } | null>(null)
 
@@ -175,7 +180,7 @@ export default function TripPage() {
         )}
       </main>
 
-      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabBar activeTab={activeTab} onTabChange={handleTabChange} />
     </div>
   )
 }

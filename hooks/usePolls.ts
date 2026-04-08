@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import type { Poll, Vote } from '@/lib/supabase/types'
 
@@ -7,30 +7,36 @@ export function usePolls(tripId: string) {
   const [polls, setPolls] = useState<Poll[]>([])
   const [votes, setVotes] = useState<Vote[]>([])
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     const supabase = getSupabaseClient()
+    const { data: memberData } = await supabase
+      .from('members')
+      .select('id')
+      .eq('trip_id', tripId)
 
-    async function load() {
-      const { data: memberData } = await supabase
-        .from('members')
-        .select('id')
-        .eq('trip_id', tripId)
+    const memberIds = memberData?.map(m => m.id) ?? []
 
-      const memberIds = memberData?.map(m => m.id) ?? []
+    const [{ data: pollData }, { data: voteData }] = await Promise.all([
+      supabase.from('polls').select('*').eq('trip_id', tripId).order('created_at'),
+      memberIds.length > 0
+        ? supabase.from('votes').select('*').in('member_id', memberIds)
+        : Promise.resolve({ data: [] }),
+    ])
 
-      const [{ data: pollData }, { data: voteData }] = await Promise.all([
-        supabase.from('polls').select('*').eq('trip_id', tripId).order('created_at'),
-        memberIds.length > 0
-          ? supabase.from('votes').select('*').in('member_id', memberIds)
-          : Promise.resolve({ data: [] }),
-      ])
+    if (pollData) setPolls(pollData as Poll[])
+    if (voteData) setVotes(voteData as Vote[])
+  }, [tripId])
 
-      if (pollData) setPolls(pollData as Poll[])
-      if (voteData) setVotes(voteData as Vote[])
-    }
-
+  useEffect(() => {
     load()
 
+    // Refetch when the browser tab regains visibility
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') load()
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    const supabase = getSupabaseClient()
     const channel = supabase
       .channel(`polls-${tripId}`)
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'polls', filter: `trip_id=eq.${tripId}` }, load)
@@ -39,8 +45,11 @@ export function usePolls(tripId: string) {
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'votes' }, load)
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
-  }, [tripId])
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility)
+      supabase.removeChannel(channel)
+    }
+  }, [tripId, load])
 
   async function createPoll(question: string, options: string[], createdBy: string, allowMultiple = false) {
     const supabase = getSupabaseClient()
@@ -57,7 +66,6 @@ export function usePolls(tripId: string) {
     const supabase = getSupabaseClient()
     const poll = polls.find(p => p.id === pollId)
     if (poll?.allow_multiple) {
-      // Multi-select: toggle — delete if already voted for this option, insert otherwise
       const existing = votes.find(
         v => v.poll_id === pollId && v.member_id === memberId && v.option_id === optionId
       )
@@ -87,5 +95,5 @@ export function usePolls(tripId: string) {
     await supabase.from('polls').delete().eq('id', pollId)
   }
 
-  return { polls, votes, createPoll, vote, deletePoll }
+  return { polls, votes, createPoll, vote, deletePoll, refetchPolls: load }
 }
