@@ -110,6 +110,9 @@ export default function TripPage() {
       <main className="p-4">
         {activeTab === 'details' && (
           <>
+            <div style={{background:'red', color:'white', padding:16, fontWeight:'bold', fontSize:16, marginBottom:8}}>
+              PEOPLE DEBUG — {members.length} member(s)
+            </div>
             <TripHeader
               trip={trip}
               isCreator={isCreator}
@@ -118,16 +121,6 @@ export default function TripPage() {
             />
             <TripNotes tripId={tripId} initialNotes={trip.description} />
             <TripLinks tripId={tripId} memberId={member.memberId} />
-            <div style={{marginTop:16, background:'#fff', borderRadius:12, border:'1px solid #e5e7eb', padding:16, marginBottom:16}}>
-              <p style={{fontWeight:600, fontSize:14, color:'#374151', marginBottom:12}}>People ({members.length})</p>
-              {members.map((m, i) => (
-                <div key={m.id} style={{display:'flex', alignItems:'center', gap:8, marginBottom:8}}>
-                  <span style={{color:'#9ca3af', fontSize:14}}>{i + 1}.</span>
-                  <span style={{fontSize:14, color:'#111827'}}>{m.display_name}</span>
-                  {m.id === member.memberId && <span style={{fontSize:12, color:'#3b82f6'}}>(you)</span>}
-                </div>
-              ))}
-            </div>
             <div className="mt-2">
               <h3 className="font-semibold text-sm text-gray-700 mb-3">Itinerary</h3>
               <ItineraryList tripId={tripId} />
