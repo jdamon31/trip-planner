@@ -30,9 +30,13 @@ export function usePolls(tripId: string) {
   useEffect(() => {
     load()
 
-    // Refetch when the browser tab regains visibility
+    // Refetch when the browser tab regains visibility, but at most once per 30s
+    let lastRefresh = Date.now()
     function handleVisibility() {
-      if (document.visibilityState === 'visible') load()
+      if (document.visibilityState === 'visible' && Date.now() - lastRefresh > 30_000) {
+        lastRefresh = Date.now()
+        load()
+      }
     }
     document.addEventListener('visibilitychange', handleVisibility)
 
@@ -40,8 +44,6 @@ export function usePolls(tripId: string) {
     const channel = supabase
       .channel(`polls-${tripId}`)
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'polls', filter: `trip_id=eq.${tripId}` }, load)
-      // TODO: votes subscription is unfiltered — load() is trip-scoped so data is correct,
-      // but this fires on votes from all trips. Acceptable for v1.
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'votes' }, load)
       .subscribe()
 
@@ -49,7 +51,7 @@ export function usePolls(tripId: string) {
       document.removeEventListener('visibilitychange', handleVisibility)
       supabase.removeChannel(channel)
     }
-  }, [tripId, load])
+  }, [tripId])
 
   async function createPoll(question: string, options: string[], createdBy: string, allowMultiple = false) {
     const supabase = getSupabaseClient()

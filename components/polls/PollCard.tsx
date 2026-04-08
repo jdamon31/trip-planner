@@ -72,7 +72,6 @@ export function PollCard({ poll, votes, currentMemberId, memberCount, onVote, on
           }
         </p>
       )}
-
     </div>
   )
 }

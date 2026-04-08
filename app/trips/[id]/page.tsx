@@ -29,12 +29,12 @@ export default function TripPage() {
   const { polls, votes, createPoll, vote, deletePoll, refetchPolls } = usePolls(tripId)
   const { expenses, addExpense } = useExpenses(tripId)
   const [activeTab, setActiveTab] = useState<Tab>('details')
+  const [showAddExpense, setShowAddExpense] = useState(false)
 
   function handleTabChange(tab: Tab) {
     if (tab === 'polls') refetchPolls()
     setActiveTab(tab)
   }
-  const [showAddExpense, setShowAddExpense] = useState(false)
   const [member, setMember] = useState<{ memberId: string; displayName: string } | null>(null)
 
   useEffect(() => {
