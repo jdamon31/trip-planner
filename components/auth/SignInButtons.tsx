@@ -30,15 +30,6 @@ export function SignInButtons({ redirectTo = '/' }: SignInButtonsProps) {
         Sign in with Google
       </button>
 
-      <button
-        onClick={() => signIn('apple')}
-        className="w-full flex items-center justify-center gap-3 border rounded-lg py-3 text-sm font-medium bg-black text-white active:bg-gray-900"
-      >
-        <svg width="16" height="18" viewBox="0 0 814 1000" fill="white" aria-hidden="true">
-          <path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.2-150.3-109.1c-51.1-75.2-91.8-194.3-91.8-307.3C19.1 196.1 136.7 26 295.1 26c74.3 0 136.3 48 182.3 48 43.8 0 113.3-51.2 197.2-51.2 32.6 0 117.1 2.6 178.3 95.1zm-234.8-181.3c31.4-37.9 53.9-90.7 53.9-143.5 0-7.5-.6-15.1-1.9-22c-51.4 2-112.1 34.5-149.7 79.1-27.5 31.4-54.5 84.1-54.5 137.7 0 8.3 1.3 16.6 1.9 19.2 3.2.6 8.4 1.3 13.6 1.3 46.5 0 103.8-30.8 136.7-71.8z"/>
-        </svg>
-        Sign in with Apple
-      </button>
     </div>
   )
 }

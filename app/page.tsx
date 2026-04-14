@@ -1,10 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { format, parseISO } from 'date-fns'
 import { useAuth } from '@/contexts/AuthContext'
 import { SignInButtons } from '@/components/auth/SignInButtons'
 import { getSupabaseClient } from '@/lib/supabase/client'
 import type { Trip } from '@/lib/supabase/types'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 type MyTrip = Trip & { memberCount: number }
 
@@ -77,7 +79,10 @@ export default function HomePage() {
       {/* Header */}
       <div className="w-full max-w-md mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Trip Planner</h1>
+          <div>
+            <h1 className="text-2xl font-bold">Tripkit</h1>
+            <p className="text-xs text-gray-400">Plan together, go together.</p>
+          </div>
           {!authLoading && (
             user ? (
               <button
@@ -110,7 +115,17 @@ export default function HomePage() {
           <section className="mb-8">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">My Trips</h2>
             {tripsLoading ? (
-              <p className="text-sm text-gray-400 py-4">Loading your trips…</p>
+              <div className="space-y-2">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="bg-white rounded-xl border p-4 flex items-center gap-3">
+                    <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : myTrips.length === 0 ? (
               <p className="text-sm text-gray-400 py-4">No trips yet — create one below.</p>
             ) : (
@@ -135,7 +150,7 @@ export default function HomePage() {
                         )}
                         <div className="text-xs text-gray-400 mt-1">
                           {trip.memberCount} member{trip.memberCount !== 1 ? 's' : ''}
-                          {trip.confirmed_date ? ` · ${trip.confirmed_date}` : ''}
+                          {trip.confirmed_dates?.[0] ? ` · ${format(parseISO(trip.confirmed_dates[0]), 'MMM d, yyyy')}` : ''}
                         </div>
                       </div>
                     </div>

@@ -6,8 +6,18 @@ import { AuthProvider } from '@/contexts/AuthContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Trip Planner',
-  description: 'Plan trips with your group',
+  title: 'Tripkit',
+  description: 'Plan trips with your group. No sign-up needed.',
+  openGraph: {
+    title: 'Tripkit',
+    description: 'Plan trips with your group. No sign-up needed.',
+    type: 'website',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Tripkit',
+  },
 }
 
 export const viewport: Viewport = {
@@ -18,8 +28,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-gray-50 min-h-screen`}>
+    <html lang="en" style={{ colorScheme: 'light' }}>
+      <body className={`${inter.className} min-h-screen`} style={{ background: 'var(--background)', color: 'var(--foreground)' }}>
         <AuthProvider>
           {children}
         </AuthProvider>

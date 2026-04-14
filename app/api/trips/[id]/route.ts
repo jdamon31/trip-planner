@@ -9,6 +9,8 @@ export async function PATCH(
   const body = await request.json()
 
   const updateFields: Record<string, unknown> = {}
+  if (typeof body.name !== 'undefined') updateFields.name = body.name?.trim() || undefined
+  if (typeof body.destination !== 'undefined') updateFields.destination = body.destination?.trim() || null
   if (typeof body.photo_url !== 'undefined') updateFields.photo_url = body.photo_url
   if (typeof body.date_ranges !== 'undefined') updateFields.date_ranges = body.date_ranges
 

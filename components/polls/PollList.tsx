@@ -18,6 +18,7 @@ type PollListProps = {
 export function PollList({ polls, votes, currentMemberId, memberCount, onVote, onDelete, onCreatePoll }: PollListProps) {
   const [showCreate, setShowCreate] = useState(false)
   const [deletingPoll, setDeletingPoll] = useState<Poll | null>(null)
+  const [createError, setCreateError] = useState('')
 
   return (
     <div>
@@ -32,12 +33,18 @@ export function PollList({ polls, votes, currentMemberId, memberCount, onVote, o
       {showCreate && (
         <CreatePollForm
           onSubmit={async (q, opts, allowMultiple) => {
-            await onCreatePoll(q, opts, allowMultiple)
-            setShowCreate(false)
+            setCreateError('')
+            try {
+              await onCreatePoll(q, opts, allowMultiple)
+              setShowCreate(false)
+            } catch (err: any) {
+              setCreateError(err.message ?? 'Failed to create poll')
+            }
           }}
-          onCancel={() => setShowCreate(false)}
+          onCancel={() => { setShowCreate(false); setCreateError('') }}
         />
       )}
+      {createError && <p className="text-red-600 text-sm mb-3">{createError}</p>}
       {polls.map(poll => (
         <PollCard
           key={poll.id}

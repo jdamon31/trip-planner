@@ -35,7 +35,7 @@ export function rankDates(rows: Availability[]): RankedDate[] {
 
 export function getBestDates(rows: Availability[], memberCount: number): RankedDate[] {
   const ranked = rankDates(rows)
-  return ranked.slice(0, 2).map(d => ({
+  return ranked.slice(0, 4).map(d => ({
     ...d,
     allAvailable: d.availableCount === memberCount,
   }))

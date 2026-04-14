@@ -1,118 +1,39 @@
 'use client'
-import { useState, useEffect } from 'react'
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { format, parseISO } from 'date-fns'
-import { getSupabaseClient } from '@/lib/supabase/client'
-import type { ItineraryItem } from '@/lib/supabase/types'
-import { AddItineraryForm } from './AddItineraryForm'
-
-function SortableItem({ item }: { item: ItineraryItem }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id })
-  const style = { transform: CSS.Transform.toString(transform), transition }
-
-  return (
-    <div ref={setNodeRef} style={style} className="bg-white border rounded-xl p-3 flex items-start gap-3 mb-2">
-      <button {...attributes} {...listeners}
-        className="text-gray-300 mt-0.5 cursor-grab active:cursor-grabbing touch-none select-none">
-        ⠿
-      </button>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-800">{item.activity}</p>
-        {(item.day || item.time) && (
-          <p className="text-xs text-gray-400 mt-0.5">
-            {item.day && format(parseISO(item.day), 'MMM d')}
-            {item.day && item.time && ' · '}
-            {item.time && item.time.slice(0, 5)}
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
+import { useItinerary } from '@/hooks/useItinerary'
+import { DaySection } from './DaySection'
 
 interface ItineraryListProps {
   tripId: string
+  confirmedDates: string[]
+  memberName: string
 }
 
-export function ItineraryList({ tripId }: ItineraryListProps) {
-  const [items, setItems] = useState<ItineraryItem[]>([])
+export function ItineraryList({ tripId, confirmedDates, memberName }: ItineraryListProps) {
+  const { items, itineraryDays, addItem, updateItem, deleteItem, addDay, moveItem } = useItinerary(tripId)
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } })
-  )
-
-  useEffect(() => {
-    const supabase = getSupabaseClient()
-
-    supabase.from('itinerary_items').select('*').eq('trip_id', tripId).order('sort_order')
-      .then(({ data }) => { if (data) setItems(data as ItineraryItem[]) })
-
-    const channel = supabase
-      .channel(`itinerary-${tripId}`)
-      .on('postgres_changes' as any,
-        { event: '*', schema: 'public', table: 'itinerary_items', filter: `trip_id=eq.${tripId}` },
-        () => {
-          supabase.from('itinerary_items').select('*').eq('trip_id', tripId).order('sort_order')
-            .then(({ data }) => { if (data) setItems(data as ItineraryItem[]) })
-        }
-      )
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [tripId])
-
-  async function handleAdd(item: { day: string | null; time: string | null; activity: string }) {
-    const supabase = getSupabaseClient()
-    const { data } = await supabase
-      .from('itinerary_items')
-      .insert({ trip_id: tripId, ...item, sort_order: items.length })
-      .select()
-      .single()
-    if (data) setItems(prev => [...prev, data as ItineraryItem])
-  }
-
-  async function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-    const oldIndex = items.findIndex(i => i.id === active.id)
-    const newIndex = items.findIndex(i => i.id === over.id)
-    const reordered = arrayMove(items, oldIndex, newIndex)
-    setItems(reordered)
-    const supabase = getSupabaseClient()
-    await Promise.all(
-      reordered.map((item, idx) =>
-        supabase.from('itinerary_items').update({ sort_order: idx }).eq('id', item.id)
-      )
-    )
-  }
+  const days = Array.from({ length: itineraryDays }, (_, i) => i + 1)
 
   return (
     <div>
-      <AddItineraryForm onSubmit={handleAdd} />
-      {items.length === 0 && (
-        <p className="text-center text-gray-400 text-sm py-4">No itinerary items yet</p>
-      )}
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-          {items.map(item => <SortableItem key={item.id} item={item} />)}
-        </SortableContext>
-      </DndContext>
+      {days.map(dayNum => (
+        <DaySection
+          key={dayNum}
+          dayNumber={dayNum}
+          confirmedDates={confirmedDates}
+          items={items.filter(i => i.day_number === dayNum)}
+          itineraryDays={itineraryDays}
+          onAdd={(data) => addItem({ ...data, day_number: dayNum }, memberName)}
+          onEdit={updateItem}
+          onMove={moveItem}
+          onDelete={deleteItem}
+        />
+      ))}
+      <button
+        onClick={addDay}
+        className="w-full border-2 border-dashed border-gray-200 rounded-xl py-3 text-sm text-gray-500 font-medium active:bg-gray-50"
+      >
+        + Add Day
+      </button>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { getMemberFromStorage, saveMemberToStorage } from '@/hooks/useMember'
 import { useAuth } from '@/contexts/AuthContext'
 import { SignInButtons } from '@/components/auth/SignInButtons'
+import { getSupabaseClient } from '@/lib/supabase/client'
 
 export default function JoinPage() {
   const router = useRouter()
@@ -14,6 +15,12 @@ export default function JoinPage() {
   const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [tripName, setTripName] = useState<string | null>(null)
+
+  useEffect(() => {
+    getSupabaseClient().from('trips').select('name').eq('id', tripId).single()
+      .then(({ data }) => { if (data) setTripName(data.name) })
+  }, [tripId])
 
   useEffect(() => {
     if (authLoading) return
@@ -67,7 +74,9 @@ export default function JoinPage() {
       <div className="w-full max-w-md">
         {screen === 'signin' ? (
           <>
-            <h1 className="text-2xl font-bold text-center mb-2">Join the trip</h1>
+            <h1 className="text-2xl font-bold text-center mb-2">
+              {tripName ? `You're invited to ${tripName}` : 'Join the trip'}
+            </h1>
             <p className="text-gray-500 text-center mb-8">Sign in to keep your trips synced across devices</p>
 
             <div className="bg-white rounded-2xl shadow-sm border p-6 space-y-4">
@@ -82,7 +91,9 @@ export default function JoinPage() {
           </>
         ) : (
           <>
-            <h1 className="text-2xl font-bold text-center mb-2">Join the trip</h1>
+            <h1 className="text-2xl font-bold text-center mb-2">
+              {tripName ? `You're invited to ${tripName}` : 'Join the trip'}
+            </h1>
             <p className="text-gray-500 text-center mb-8">What should we call you?</p>
 
             <form onSubmit={handleJoin} className="bg-white rounded-2xl shadow-sm border p-6 space-y-4">

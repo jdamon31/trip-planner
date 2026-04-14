@@ -55,6 +55,11 @@ export function usePolls(tripId: string) {
 
   async function createPoll(question: string, options: string[], createdBy: string, allowMultiple = false) {
     const supabase = getSupabaseClient()
+    const { count } = await supabase
+      .from('polls')
+      .select('*', { count: 'exact', head: true })
+      .eq('trip_id', tripId)
+    if ((count ?? 0) >= 50) throw new Error('Poll limit reached (50 per trip)')
     await supabase.from('polls').insert({
       trip_id: tripId,
       created_by: createdBy,

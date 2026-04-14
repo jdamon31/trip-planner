@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAF8EF;
+  --foreground: #3E2C23;
 }
 
 @theme inline {
@@ -10,8 +10,25 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
+  /* Olive Green palette — replaces Tailwind's default blue scale */
+  --color-blue-50:  #F5F5DC;
+  --color-blue-100: #EAE8C8;
+  --color-blue-200: #CFE1B9;
+  --color-blue-300: #BDD4A0;
+  --color-blue-400: #8FA84A;
+  --color-blue-500: #6B8E23;
+  --color-blue-600: #6B8E23;
+  --color-blue-700: #5A7A1C;
+  --color-blue-800: #4A6518;
+  --color-blue-900: #3E2C23;
+  --color-blue-950: #2A1E18;
+
+  /* Terracotta replaces red — warmer destructive actions */
+  --color-red-500:  #D2691E;
+  --color-red-600:  #D2691E;
+  --color-red-700:  #B5561A;
+}
 
 body {
   background: var(--background);

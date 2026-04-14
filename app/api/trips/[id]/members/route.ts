@@ -24,6 +24,15 @@ export async function POST(
     return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
   }
 
+  // Enforce member cap
+  const { count } = await supabase
+    .from('members')
+    .select('*', { count: 'exact', head: true })
+    .eq('trip_id', id)
+  if ((count ?? 0) >= 150) {
+    return NextResponse.json({ error: 'This trip is full (150 member limit)' }, { status: 403 })
+  }
+
   // If userId provided, check if this user is already a member
   if (userId) {
     const { data: existing } = await supabase

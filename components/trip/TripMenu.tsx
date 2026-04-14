@@ -7,9 +7,10 @@ type TripMenuProps = {
   isCreator: boolean
   onLeave: () => Promise<void>
   onDelete: () => Promise<void>
+  onEdit: () => void
 }
 
-export function TripMenu({ tripName, isCreator, onLeave, onDelete }: TripMenuProps) {
+export function TripMenu({ tripName, isCreator, onLeave, onDelete, onEdit }: TripMenuProps) {
   const [open, setOpen] = useState(false)
   const [confirm, setConfirm] = useState<'leave' | 'delete' | null>(null)
   const [busy, setBusy] = useState(false)
@@ -47,6 +48,14 @@ export function TripMenu({ tripName, isCreator, onLeave, onDelete }: TripMenuPro
 
       <BottomSheet open={open} onClose={() => setOpen(false)} title="Trip options">
         <div className="space-y-2 pb-2">
+          {isCreator && (
+            <button
+              onClick={() => { setOpen(false); onEdit() }}
+              className="w-full text-left px-4 py-3 rounded-lg text-gray-800 font-medium active:bg-gray-50"
+            >
+              Edit trip details
+            </button>
+          )}
           <button
             onClick={handleLeave}
             className="w-full text-left px-4 py-3 rounded-lg text-red-600 font-medium active:bg-red-50"

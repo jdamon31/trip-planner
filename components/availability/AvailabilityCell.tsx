@@ -8,14 +8,14 @@ interface AvailabilityCellProps {
 }
 
 const STATUS_STYLES: Record<AvailabilityStatus, string> = {
-  available: 'bg-green-100 text-green-700 border-green-300',
-  maybe: 'bg-yellow-100 text-yellow-700 border-yellow-300',
-  unavailable: 'bg-gray-100 text-gray-400 border-gray-200',
+  available:   'bg-green-500 text-white border-green-600',
+  maybe:       'bg-amber-300 text-amber-900 border-amber-400',
+  unavailable: 'bg-white text-gray-300 border-gray-200',
 }
 
 const STATUS_ICONS: Record<AvailabilityStatus, string> = {
-  available: '✓',
-  maybe: '~',
+  available:   '✓',
+  maybe:       '~',
   unavailable: '✕',
 }
 
@@ -26,7 +26,7 @@ export function AvailabilityCell({ status, isCurrentUser, isBestDate, onClick }:
     <button
       onClick={isCurrentUser ? onClick : undefined}
       className={`
-        min-w-[44px] min-h-[44px] flex items-center justify-center text-sm font-medium border rounded
+        min-w-[44px] min-h-[44px] flex items-center justify-center text-base font-bold border rounded
         ${STATUS_STYLES[displayStatus]}
         ${isBestDate ? 'ring-2 ring-blue-400' : ''}
         ${isCurrentUser ? 'cursor-pointer active:scale-95' : 'cursor-default'}
