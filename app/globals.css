@@ -8,10 +8,22 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-dm), var(--font-inter);
+  --font-mono: ui-monospace, monospace;
 
-  /* Olive Green palette — replaces Tailwind's default blue scale */
+  /* Warm gray scale — replaces Tailwind's cool grays throughout the app */
+  --color-gray-50:  #FAF8F5;
+  --color-gray-100: #F0EDE8;
+  --color-gray-200: #E2DDD6;
+  --color-gray-300: #C9C3BA;
+  --color-gray-400: #A09690;
+  --color-gray-500: #7A7068;
+  --color-gray-600: #5C5450;
+  --color-gray-700: #453E3A;
+  --color-gray-800: #3E2C23;
+  --color-gray-900: #2A1E18;
+
+  /* Olive — replaces Tailwind's blue scale */
   --color-blue-50:  #F5F5DC;
   --color-blue-100: #EAE8C8;
   --color-blue-200: #CFE1B9;
@@ -22,16 +34,24 @@
   --color-blue-700: #5A7A1C;
   --color-blue-800: #4A6518;
   --color-blue-900: #3E2C23;
-  --color-blue-950: #2A1E18;
 
-  /* Terracotta replaces red — warmer destructive actions */
+  /* Terracotta — replaces Tailwind's red scale */
+  --color-red-50:   #FDF3EC;
+  --color-red-100:  #FADED0;
+  --color-red-200:  #F4C0A0;
+  --color-red-400:  #D2691E;
   --color-red-500:  #D2691E;
-  --color-red-600:  #D2691E;
-  --color-red-700:  #B5561A;
+  --color-red-600:  #B85A18;
+  --color-red-700:  #9E4D14;
+
+  /* Amber stays warm */
+  --color-amber-100: #FEF3C7;
+  --color-amber-400: #FBBF24;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm), var(--font-inter), Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }

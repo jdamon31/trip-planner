@@ -50,13 +50,13 @@ export function TripHeader({ trip, isCreator, onLeave, onDelete }: TripHeaderPro
   }
 
   return (
-    <div className="bg-white rounded-xl border p-4 mb-4">
-      <div className="flex items-start gap-3">
+    <div className="bg-white rounded-xl border mb-4 overflow-hidden" style={{ borderColor: 'rgba(62,44,35,0.08)' }}>
+      <div className="p-4 flex items-start gap-3">
         <TripPhoto tripId={trip.id} photoUrl={trip.photo_url} tripName={trip.name} />
         <div className="flex-1 min-w-0">
-          <h2 className="text-xl font-bold leading-tight">{trip.name}</h2>
+          <h2 className="text-xl font-bold leading-tight" style={{ color: '#3E2C23' }}>{trip.name}</h2>
           {trip.destination && (
-            <p className="text-gray-500 text-sm mt-0.5">📍 {trip.destination}</p>
+            <p className="text-sm mt-0.5" style={{ color: 'rgba(62,44,35,0.5)' }}>📍 {trip.destination}</p>
           )}
           {trip.confirmed_dates?.length > 0 && (
             <div className="mt-2">
@@ -75,38 +75,41 @@ export function TripHeader({ trip, isCreator, onLeave, onDelete }: TripHeaderPro
           onEdit={openEdit}
         />
       </div>
-      <div className="mt-3 flex items-center gap-4">
-        <a href="/" className="text-sm text-blue-600 font-medium">← My trips</a>
-        <a href="/" className="text-sm text-gray-400">+ Create new trip</a>
+      <div className="px-4 pb-3 flex items-center gap-4 border-t pt-3" style={{ borderColor: 'rgba(62,44,35,0.06)' }}>
+        <a href="/" className="text-sm font-medium" style={{ color: '#6B8E23' }}>← My trips</a>
+        <a href="/" className="text-sm" style={{ color: 'rgba(62,44,35,0.35)' }}>+ New trip</a>
       </div>
 
       <BottomSheet open={editing} onClose={() => setEditing(false)} title="Edit trip">
         <form onSubmit={handleSave} className="space-y-4 pb-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Trip name *</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'rgba(62,44,35,0.45)' }}>Trip name *</label>
             <input
               type="text"
               value={editName}
               onChange={e => setEditName(e.target.value)}
               required
               autoFocus
-              className="w-full border rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border-2 rounded-xl px-4 py-3 text-base focus:outline-none transition-colors"
+              style={{ borderColor: 'rgba(62,44,35,0.1)', background: 'white', color: '#3E2C23' }}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Destination (optional)</label>
+            <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: 'rgba(62,44,35,0.45)' }}>Destination (optional)</label>
             <input
               type="text"
               value={editDest}
               onChange={e => setEditDest(e.target.value)}
               placeholder="Yosemite National Park"
-              className="w-full border rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border-2 rounded-xl px-4 py-3 text-base focus:outline-none transition-colors"
+              style={{ borderColor: 'rgba(62,44,35,0.1)', background: 'white', color: '#3E2C23' }}
             />
           </div>
           <button
             type="submit"
             disabled={saving || !editName.trim()}
-            className="w-full bg-blue-600 text-white rounded-lg py-3 font-semibold text-base disabled:opacity-50 active:bg-blue-700"
+            className="w-full rounded-xl py-3 font-bold text-base disabled:opacity-40"
+            style={{ background: '#3E2C23', color: '#FAF8EF' }}
           >
             {saving ? 'Saving…' : 'Save changes'}
           </button>

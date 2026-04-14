@@ -380,70 +380,19 @@ function LandingPage({
             </h2>
           </Reveal>
 
-          {/* Asymmetric grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
-            {/* Feature 1 — wide */}
-            <Reveal delay={0} className="col-span-2 lg:col-span-2">
-              <FeatureCard
-                icon="📅"
-                title="Date range voting"
-                body="Propose weekends and windows. Everyone responds with a simple ✓ In, ~ Partial, or ✗ Can't. The highest-voted range gets a Best Match badge. One tap sets it as the official trip dates."
-                accent="#6B8E23"
-                large
-              />
-            </Reveal>
-
-            {/* Feature 2 */}
-            <Reveal delay={0.08}>
-              <FeatureCard
-                icon="💬"
-                title="Group chat"
-                body="Real-time messaging built in. No need for a separate WhatsApp thread — everyone's already here."
-                accent="#D2691E"
-              />
-            </Reveal>
-
-            {/* Feature 3 */}
-            <Reveal delay={0.04}>
-              <FeatureCard
-                icon="💸"
-                title="Expense splitting"
-                body="Log who paid what, split costs any way you like, and see exactly who owes whom at a glance."
-                accent="#6B8E23"
-              />
-            </Reveal>
-
-            {/* Feature 4 — wide */}
-            <Reveal delay={0.1} className="col-span-2 lg:col-span-2">
-              <FeatureCard
-                icon="🗺️"
-                title="Day-by-day itinerary"
-                body="Build a real itinerary with activities, times, and locations. Drag to reorder. Add notes. Move things between days. Everyone sees updates instantly."
-                accent="#D2691E"
-                large
-              />
-            </Reveal>
-
-            {/* Feature 5 */}
-            <Reveal delay={0.06} className="col-span-2 lg:col-span-1">
-              <FeatureCard
-                icon="🔗"
-                title="One link to rule them all"
-                body="Share a single URL. Anyone who opens it can join — no app, no account, no waiting for approval."
-                accent="#8B5A2B"
-              />
-            </Reveal>
-
-            {/* Feature 6 */}
-            <Reveal delay={0.14} className="col-span-2 lg:col-span-2">
-              <FeatureCard
-                icon="📋"
-                title="Polls for group decisions"
-                body="Can't agree on a restaurant? Create a quick poll. Single or multi-select. See results in real time. Democracy, solved."
-                accent="#6B8E23"
-                large
-              />
-            </Reveal>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { icon: '📅', title: 'Date range voting', body: 'Propose weekends and windows. Everyone votes ✓ In, ~ Partial, or ✗ Can\'t. The top-scoring range gets a Best Match badge.', delay: 0 },
+              { icon: '💬', title: 'Group chat', body: 'Real-time messaging built right in. No separate thread needed — the whole group is already here.', delay: 0.06 },
+              { icon: '💸', title: 'Expense splitting', body: 'Log who paid what with custom splits. A live balance summary shows exactly who owes whom.', delay: 0.12 },
+              { icon: '🗺️', title: 'Day-by-day itinerary', body: 'Build a real itinerary with times and locations. Drag to reorder, move between days, everyone sees updates live.', delay: 0.04 },
+              { icon: '🔗', title: 'One link, everyone in', body: 'Share a single URL. Anyone who opens it can join — no app download, no account, no friction.', delay: 0.1 },
+              { icon: '🗳️', title: 'Group polls', body: 'Can\'t agree on a restaurant? Quick polls with single or multi-select options. Real-time results.', delay: 0.08 },
+            ].map(f => (
+              <Reveal key={f.title} delay={f.delay}>
+                <FeatureCard icon={f.icon} title={f.title} body={f.body} />
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
@@ -542,17 +491,12 @@ function LandingPage({
   }
 }
 
-function FeatureCard({ icon, title, body, accent, large = false }: {
-  icon: string; title: string; body: string; accent: string; large?: boolean
-}) {
+function FeatureCard({ icon, title, body }: { icon: string; title: string; body: string }) {
   return (
-    <div
-      className={`rounded-2xl p-6 lg:p-7 h-full transition-transform hover:-translate-y-0.5`}
-      style={{ background: '#F5F0E8', border: '1px solid rgba(62,44,35,0.06)' }}
-    >
+    <div className="rounded-2xl p-6 h-full" style={{ background: '#F5F0E8', border: '1px solid rgba(62,44,35,0.06)' }}>
       <div className="text-3xl mb-4">{icon}</div>
-      <h3 className={`font-bold mb-2 ${large ? 'text-xl' : 'text-lg'}`} style={{ color: '#3E2C23' }}>{title}</h3>
-      <p className="text-sm text-[#3E2C23]/60 leading-relaxed">{body}</p>
+      <h3 className="text-lg font-bold mb-2" style={{ color: '#3E2C23' }}>{title}</h3>
+      <p className="text-sm leading-relaxed" style={{ color: 'rgba(62,44,35,0.6)' }}>{body}</p>
     </div>
   )
 }

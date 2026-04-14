@@ -139,12 +139,12 @@ export default function TripPage() {
   }
 
   return (
-    <div className="min-h-screen pb-16">
-      <header className="bg-white border-b px-4 py-3 sticky top-0 z-10">
+    <div className="min-h-screen pb-16" style={{ background: '#FAF8EF' }}>
+      <header className="px-4 py-3 sticky top-0 z-10 border-b" style={{ background: '#3E2C23', borderColor: 'rgba(255,255,255,0.08)' }}>
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-bold text-lg">{trip.name}</h1>
-            {trip.destination && <p className="text-sm text-gray-500">{trip.destination}</p>}
+          <div className="min-w-0">
+            <h1 className="font-bold text-base leading-tight truncate" style={{ color: '#FAF8EF' }}>{trip.name}</h1>
+            {trip.destination && <p className="text-xs mt-0.5 truncate" style={{ color: 'rgba(250,248,239,0.5)' }}>{trip.destination}</p>}
           </div>
           <button
             onClick={() => {
@@ -156,7 +156,8 @@ export default function TripPage() {
                 alert('Invite link copied!')
               }
             }}
-            className="text-blue-600 text-sm font-medium border border-blue-200 rounded-full px-3 py-1.5 active:bg-blue-50 shrink-0 ml-3"
+            className="text-xs font-semibold rounded-full px-3 py-1.5 shrink-0 ml-3 transition-opacity active:opacity-70"
+            style={{ background: 'rgba(250,248,239,0.12)', color: '#FAF8EF', border: '1px solid rgba(250,248,239,0.2)' }}
           >
             Share
           </button>
@@ -169,14 +170,16 @@ export default function TripPage() {
             <TripHeader trip={trip} isCreator={isCreator} onLeave={handleLeave} onDelete={handleDelete} />
             <TripNotes tripId={tripId} initialNotes={trip.description} />
             <TripLinks tripId={tripId} memberId={member.memberId} />
-            <div className="mt-4 bg-white rounded-xl border p-4 mb-4">
-              <h3 className="font-semibold text-sm text-gray-700 mb-3">People ({members.length})</h3>
-              <ol className="space-y-2 list-none">
+            <div className="mt-4 bg-white rounded-xl border mb-4 overflow-hidden" style={{ borderColor: 'rgba(62,44,35,0.08)' }}>
+              <div className="px-4 py-3 border-b" style={{ borderColor: 'rgba(62,44,35,0.06)' }}>
+                <h3 className="font-semibold text-sm" style={{ color: '#3E2C23' }}>People ({members.length})</h3>
+              </div>
+              <ol className="divide-y list-none" style={{ '--tw-divide-opacity': 1 } as any}>
                 {members.map((m, i) => (
-                  <li key={m.id} className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="text-gray-400 w-5 text-right shrink-0">{i + 1}.</span>
-                    <span>{m.display_name}</span>
-                    {m.id === member.memberId && <span className="text-xs text-blue-500">(you)</span>}
+                  <li key={m.id} className="flex items-center gap-3 px-4 py-2.5" style={{ borderColor: 'rgba(62,44,35,0.05)' }}>
+                    <span className="text-xs w-5 text-right shrink-0" style={{ color: 'rgba(62,44,35,0.3)' }}>{i + 1}</span>
+                    <span className="text-sm" style={{ color: '#3E2C23' }}>{m.display_name}</span>
+                    {m.id === member.memberId && <span className="text-xs ml-auto" style={{ color: '#6B8E23' }}>you</span>}
                   </li>
                 ))}
               </ol>

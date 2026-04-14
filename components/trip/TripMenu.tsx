@@ -36,7 +36,8 @@ export function TripMenu({ tripName, isCreator, onLeave, onDelete, onEdit }: Tri
     <>
       <button
         onClick={() => setOpen(true)}
-        className="p-2 text-gray-400 active:text-gray-600"
+        className="p-2 transition-opacity hover:opacity-70"
+        style={{ color: 'rgba(62,44,35,0.35)' }}
         aria-label="Trip menu"
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -47,25 +48,34 @@ export function TripMenu({ tripName, isCreator, onLeave, onDelete, onEdit }: Tri
       </button>
 
       <BottomSheet open={open} onClose={() => setOpen(false)} title="Trip options">
-        <div className="space-y-2 pb-2">
+        <div className="space-y-1 pb-2">
           {isCreator && (
             <button
               onClick={() => { setOpen(false); onEdit() }}
-              className="w-full text-left px-4 py-3 rounded-lg text-gray-800 font-medium active:bg-gray-50"
+              className="w-full text-left px-4 py-3 rounded-xl font-medium transition-colors"
+              style={{ color: '#3E2C23' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(62,44,35,0.05)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               Edit trip details
             </button>
           )}
           <button
             onClick={handleLeave}
-            className="w-full text-left px-4 py-3 rounded-lg text-red-600 font-medium active:bg-red-50"
+            className="w-full text-left px-4 py-3 rounded-xl font-medium transition-colors"
+            style={{ color: '#D2691E' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(210,105,30,0.06)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             Leave trip
           </button>
           {isCreator && (
             <button
               onClick={() => setConfirm('delete')}
-              className="w-full text-left px-4 py-3 rounded-lg text-red-700 font-semibold active:bg-red-50"
+              className="w-full text-left px-4 py-3 rounded-xl font-semibold transition-colors"
+              style={{ color: '#B85A18' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(184,90,24,0.06)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               Delete trip
             </button>
