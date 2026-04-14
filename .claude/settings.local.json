@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git worktree:*)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir=no --import-alias=\"@/*\" --yes)",
+      "Bash(npm install:*)",
+      "Bash(node -e \"const j = require\\('jest'\\); console.log\\(Object.keys\\(j\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\('./node_modules/jest/package.json'\\); console.log\\('jest version:', pkg.version\\)\")",
+      "Bash(npm run:*)",
+      "Bash(npx jest:*)",
+      "Bash(mkdir -p /Users/jonnydamon/claude-projects/ios-task-app/.worktrees/trip-planner/app/api/trips/\\\\[id\\\\]/members)",
+      "Bash(mkdir -p /Users/jonnydamon/claude-projects/ios-task-app/.worktrees/trip-planner/app/trips/\\\\[id\\\\]/join)",
+      "Bash(npx tsc:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}
